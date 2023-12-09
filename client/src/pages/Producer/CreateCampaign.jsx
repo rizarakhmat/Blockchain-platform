@@ -34,7 +34,7 @@ const CreateCampaign = () => {
         navigate('/');
       } else {
         alert('Provide valid image URL')
-        setForm({ ...form, imgae: '' });
+        setForm({ ...form, image: '' });
       }
     })
 

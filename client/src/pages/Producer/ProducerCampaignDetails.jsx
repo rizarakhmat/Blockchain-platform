@@ -89,7 +89,7 @@ const ProducerCampaignDetails = () => {
                     <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] break-ll">{item.donations}</p>
                   </div>
                 )) : (
-                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">No Funders yet. Be the first one!</p>
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">No Funders yet.</p>
                 )}
               </div>
           </div>
