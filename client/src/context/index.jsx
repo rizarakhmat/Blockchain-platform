@@ -1,6 +1,6 @@
 import React, { useContext, createContext } from 'react';
 import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS } from '../constants/addresses'
-import { useAddress, useContract, useMetamask, useContractWrite, useMintNFT } from '@thirdweb-dev/react';
+import { useAddress, useContract, useMetamask, useContractWrite } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 
 const StateContext = createContext();
@@ -9,20 +9,29 @@ export const StateContextProvider = ({ children }) => {
   const { contract } = useContract(CROWDFUNDING_ADDRESS);
   const { contract: nftMovieContract } = useContract(NFTMOVIE_ADDRESS);
 
-  // call SC functions
+  // call createCampaign function
   const { mutateAsync: createCampaign } = useContractWrite(contract, 'createCampaign');
-  const { mutateAsync: mint } = useContractWrite(nftMovieContract, 'createNFTMovie');
+  const { mutateAsync: createNFTMovie, isLoading } = useContractWrite(nftMovieContract, 'createNFTMovie');
 
   const address = useAddress();
   const connect = useMetamask();
 
   const onMintClick = async () => {
-    try {
-      const tx = await mint({
-        args: ['https://gateway.ipfscdn.io/ipfs/QmZbovNXznTHpYn2oqgCFQYP4ZCpKDquenv5rFCX8irseo/0.png']
+    try { 
+      // call my function createNFTMovie() -> error
+      const tx = await createNFTMovie({
+        args: [
+          'https://gateway.ipfscdn.io/ipfs/QmZbovNXznTHpYn2oqgCFQYP4ZCpKDquenv5rFCX8irseo/0.png'
+        ],
+        overrides: {
+          gasLimit: 1000000,
+          gasPrice: 0,
+        },
       });
+      
+      console.log("Contract NFTMovie call success. 🚀 Successfully Minted NFT!", data)
     } catch (error) {
-      console.log(error);
+      console.log("Contract NFTMovie call failure", error);
     }
   }
 
@@ -42,9 +51,9 @@ export const StateContextProvider = ({ children }) => {
         },
       });
 
-      console.log("Contract call success", data)
+      console.log("Contract CrowdFunding call success", data)
     } catch (error) {
-      console.log("Contract call failure", error)
+      console.log("Contract CrowdFunding call failure", error)
     }
   }
 

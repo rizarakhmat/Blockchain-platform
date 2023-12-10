@@ -10,7 +10,7 @@ import { profile, money } from '../../assets'
 const ProducerCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { onMintClick, nftMovieContract, getDonations, contract, address } = useStateContext();
+  const { onMintClick, getDonations, contract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
