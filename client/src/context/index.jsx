@@ -1,18 +1,30 @@
 import React, { useContext, createContext } from 'react';
-
-import { useAddress, useContract, useMetamask, useContractWrite } from '@thirdweb-dev/react';
+import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS } from '../constants/addresses'
+import { useAddress, useContract, useMetamask, useContractWrite, useMintNFT } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 
 const StateContext = createContext();
 
 export const StateContextProvider = ({ children }) => {
-  const { contract } = useContract('0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0');
+  const { contract } = useContract(CROWDFUNDING_ADDRESS);
+  const { contract: nftMovieContract } = useContract(NFTMOVIE_ADDRESS);
 
-  // call createCampaign function
+  // call SC functions
   const { mutateAsync: createCampaign } = useContractWrite(contract, 'createCampaign');
+  const { mutateAsync: mint } = useContractWrite(nftMovieContract, 'createNFTMovie');
 
   const address = useAddress();
   const connect = useMetamask();
+
+  const onMintClick = async () => {
+    try {
+      const tx = await mint({
+        args: ['https://gateway.ipfscdn.io/ipfs/QmZbovNXznTHpYn2oqgCFQYP4ZCpKDquenv5rFCX8irseo/0.png']
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const publishCampaign =  async (form) => {
     try {
@@ -116,6 +128,7 @@ export const StateContextProvider = ({ children }) => {
       value={{
         address,
         contract,
+        nftMovieContract,
         connect,
         createCampaign: publishCampaign,
         getCampaigns,
@@ -123,6 +136,7 @@ export const StateContextProvider = ({ children }) => {
         donate,
         getDonations,
         getUserFundedCampaigns,
+        onMintClick
       }  
       }
     >

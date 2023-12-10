@@ -10,19 +10,27 @@ import { profile, money } from '../../assets'
 const ProducerCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { getDonations, contract, address } = useStateContext();
+  const { onMintClick, nftMovieContract, getDonations, contract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
 
   const [form, setForm] = useState({
     startDate: '',
-    deadline: ''
+    deadline: '',
+    uri: ''
   });
+
+  const handleMint = async () => {
+    setIsLoading(true);
+    onMintClick();
+    setIsLoading(false);
+    navigate('/');
+  }
 
   const handleFormFieldChange = (fieldName, e) => {
     setForm({ ...form, [fieldName]: e.target.value })
-  }
+  };
 
   const fetchDonators = async () => {
     setIsLoading(true);
@@ -117,6 +125,16 @@ const ProducerCampaignDetails = () => {
                   />
               </div>
 
+              <div className="mt-[20px] flex flex-col gap-4">
+                <FormField 
+                  labelName="Movie URI"
+                  placeholder="Place movie IPFS URI"
+                  inputType="url"
+                  value={form.uri}
+                  handleChange={(e) => handleFormFieldChange('uri', e)}
+                />
+              </div>
+
               <div className="my-[20px] w-full flex items-center p-4 bg-[#8c6dfd] h-[120px] rounded-[10px]">
                 <img src={money} alt="money" className="w-[40px] h-[40px] object-contain"/>
                 <h4 className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4 ">Ready to release?</h4>
@@ -128,7 +146,7 @@ const ProducerCampaignDetails = () => {
                   btnType="button"
                   title="Ready to Release"
                   styles="w-full bg-[#1dc071]"
-                  //handleClick={} // Call SM NFT
+                  handleClick={handleMint} // Call SM NFT
                 />
               </div>
           </div>
