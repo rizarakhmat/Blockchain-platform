@@ -73,15 +73,4 @@ contract NFTMovie is ERC721Base {
 
         return allNFTs;
     }
-
-    
-
-    /* function mintTo(address _to, string memory _tokenURI) public virtual override {
-        // Grab the next token ID being minted.
-        uint256 tokenId = nextTokenIdToMint();
-
-        // Here, "super" refers to the base contract.
-        // We are essentially saying "run the mintTo method from the base contract".
-        super.mintTo(_to, _tokenURI);
-    } */
 }
