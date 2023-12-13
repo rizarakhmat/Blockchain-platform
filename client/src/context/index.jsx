@@ -1,27 +1,49 @@
 import React, { useContext, createContext } from 'react';
-import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS } from '../constants/addresses'
+import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS, NFTMOVIETOKEN_ADDRESS, FRACTIONALIZENFT_ADDRESS } from '../constants/addresses'
 import { useAddress, useContract, useMetamask, useContractWrite } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 
 const StateContext = createContext();
 
 export const StateContextProvider = ({ children }) => {
+  let tokenId = 0; // needed to approve();
+
   const { contract } = useContract(CROWDFUNDING_ADDRESS);
   const { contract: nftMovieContract } = useContract(NFTMOVIE_ADDRESS);
+  const { contract: nftMovieTokenContract } = useContract(NFTMOVIETOKEN_ADDRESS);
+  const { contract: FractionalizeNFTContract } = useContract(FRACTIONALIZENFT_ADDRESS);
 
-  // call createCampaign function
+
+  // call CrowdFunding SC
   const { mutateAsync: createCampaign } = useContractWrite(contract, 'createCampaign');
-  const { mutateAsync: createNFTMovie, isLoading } = useContractWrite(nftMovieContract, 'createNFTMovie');
+
+  // call NFTMovie ERC721 SC
+  const { mutateAsync: createNFTMovie } = useContractWrite(nftMovieContract, 'createNFTMovie');
+  const { mutateAsync: approve } = useContractWrite(nftMovieContract, 'approve');
+
+  // call NFTMovieToken ERC20 SC
+  const { mutateAsync: approveToken } = useContractWrite(nftMovieTokenContract, 'approve');
+  const { mutateAsync: mintTokens } = useContractWrite(nftMovieTokenContract, 'mintTokens');
+
+   // call FractionalizeNFT SC
+  const { mutateAsync: lockNFTMovie } = useContractWrite(FractionalizeNFTContract, 'lockNFTMovie');
+  const { mutateAsync:  depositERC20 } = useContractWrite(FractionalizeNFTContract, 'depositERC20');
+  const { mutateAsync:  distributeERC20Tokens } = useContractWrite(FractionalizeNFTContract, 'distributeERC20Tokens');
+
 
   const address = useAddress();
   const connect = useMetamask();
 
-  const onMintClick = async () => {
+  //////////////////////////////// NFTMovie ERC721 SC functions
+
+  const onMintClick = async (title, description, image) => {
     try { 
       // call my function createNFTMovie() -> error
       const tx = await createNFTMovie({
         args: [
-          'https://gateway.ipfscdn.io/ipfs/QmZbovNXznTHpYn2oqgCFQYP4ZCpKDquenv5rFCX8irseo/0.png'
+          title,
+          description,
+          image //hardcoded2
         ],
         overrides: {
           gasLimit: 1000000,
@@ -29,11 +51,126 @@ export const StateContextProvider = ({ children }) => {
         },
       });
       
-      console.log("Contract NFTMovie call success. 🚀 Successfully Minted NFT!", data)
+      console.log("Contract NFTMovie call success. Successfully Minted NFT!", data)
     } catch (error) {
       console.log("Contract NFTMovie call failure", error);
     }
   }
+
+  const approveSC = async () => {
+    try {
+      const data = await approve({
+        args: [
+          FRACTIONALIZENFT_ADDRESS,
+          tokenId
+        ],
+        overrides: {
+          gasLimit: 1000000,
+          gasPrice: 0,
+        },
+      });
+      console.info("NFTMovie contract approve() call successs", data);
+    } catch (err) {
+      console.error("NFTMovie contract approve() failure", err);
+    }
+  }
+
+    //////////////////////////////// NFTMovieToken ERC20 SC functions
+
+  const mintERC20Tokens = async (amount) => {
+    try {
+      const data = await mintTokens({
+        args: [
+          amount
+        ],
+        overrides: {
+          gasLimit: 1000000,
+          gasPrice: 0,
+        },
+      });
+      console.info("NFTMovieToken contract mintTokens() call successs", data);
+    } catch (err) {
+      console.error("NFTMovieToken contract mintTokens() failure", err);
+    }
+  }
+
+  const approveTokenSC = async (amount) => {
+    try {
+      const data = await approveToken({
+        args: [
+          FRACTIONALIZENFT_ADDRESS,
+          amount
+        ],
+        overrides: {
+          gasLimit: 1000000,
+          gasPrice: 0,
+        },
+      });
+      console.info("NFTMovieToken contract approve() call successs", data);
+    } catch (err) {
+      console.error("NFTMovieToken contract approve() call failure", err);
+    }
+  }
+
+  //////////////////////////////// FractionalizeNFT SC functions
+
+  const lockNFT = async () => {
+    try {
+      const data = await lockNFTMovie({
+        args: [
+          tokenId
+        ],
+        overrides: {
+          gasLimit: 1000000,
+          gasPrice: 0,
+        },
+      });
+      tokenId++; // the next approve() call tokenId point to correct NFT;
+      console.info("FractionalizeNFT contract lockNFTMovie() call successs", data);
+    } catch (err) {
+      console.error("FractionalizeNFT contract lockNFTMovie() failure", err);
+    }
+  }
+
+  const depositTokens = async (amount) => {
+    try {
+      const data = await depositERC20({
+        args: [
+          FRACTIONALIZENFT_ADDRESS,
+          amount
+        ],
+        overrides: {
+          gasLimit: 1000000,
+          gasPrice: 0,
+        },
+      });
+      console.info("FractionalizeNFT contract depositERC20() call successs", data);
+    } catch (err) {
+      console.error("FractionalizeNFT contract depositERC20() failure", err);
+    }
+  }
+
+  const distributeTokens = async (amount, buyers, donations) => {
+    try {
+      const data = await distributeERC20Tokens({
+        args: [
+          amount,
+          buyers,
+          donations
+        ],
+        overrides: {
+          gasLimit: 1000000,
+          gasPrice: 0,
+        },
+      });
+      console.info("FractionalizeNFT contract distributeERC20Tokens() call successs", data);
+    } catch (err) {
+      console.error("FractionalizeNFT contract distributeERC20Tokens() failure", err);
+    }
+  }
+
+
+  //////////////////////////////// CrowdFunding SC functions
 
   const publishCampaign =  async (form) => {
     try {
@@ -137,7 +274,7 @@ export const StateContextProvider = ({ children }) => {
       value={{
         address,
         contract,
-        nftMovieContract,
+        //CrowdFunding
         connect,
         createCampaign: publishCampaign,
         getCampaigns,
@@ -145,7 +282,16 @@ export const StateContextProvider = ({ children }) => {
         donate,
         getDonations,
         getUserFundedCampaigns,
-        onMintClick
+        //ERC721 NFTMovie
+        onMintClick,
+        approveSC,
+        //ERC20 NFTMovieToken
+        mintERC20Tokens,
+        approveTokenSC,
+        //FractionalizeNFT
+        lockNFT,
+        depositTokens,
+        distributeTokens
       }  
       }
     >

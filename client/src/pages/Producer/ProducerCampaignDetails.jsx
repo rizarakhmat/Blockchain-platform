@@ -10,7 +10,17 @@ import { profile, money } from '../../assets'
 const ProducerCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { onMintClick, getDonations, contract, address } = useStateContext();
+  const { contract, address, 
+        /* CrowdFunding */
+        getDonations,
+        /* NFTMovie ERC721 */
+        approveSC, onMintClick, 
+        /* NFTMovieToken ERC20 */
+        mintERC20Tokens,
+        approveTokenSC,
+        /* FractionalizeNFT */
+        lockNFT, depositTokens, distributeTokens
+      } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
@@ -23,9 +33,41 @@ const ProducerCampaignDetails = () => {
 
   const handleMint = async () => {
     setIsLoading(true);
-    onMintClick();
+    await onMintClick(state.title, state.description, form.uri);
+    console.log("NFTMovie is minted");
+    
+    await approveSC();
+    
+    await lockNFT();
     setIsLoading(false);
-    navigate('/');
+  }
+
+  const processDonators = (donators) => {
+    const funders = donators.map(item => item.donator);
+    const donations = donators.map(item => item.donations);
+
+    return [funders, donations];
+  }
+
+  const [funders, donations] = processDonators(donators);
+
+  const handleShareOwnership = async () => {
+    setIsLoading(true);
+    await mintERC20Tokens(10); // hardcoded
+
+    await approveTokenSC(10); // hardcoded
+
+    await depositTokens(10); // hardcoded
+
+    await distributeTokens(
+      10,
+      funders,
+      donations.map(donation => {
+        const floatValue = parseFloat(donation);
+        return floatValue.toString();
+      })
+      );
+    setIsLoading(false);
   }
 
   const handleFormFieldChange = (fieldName, e) => {
@@ -35,7 +77,7 @@ const ProducerCampaignDetails = () => {
   const fetchDonators = async () => {
     setIsLoading(true);
     const data = await getDonations(state.pId);
-
+    
     setDonators(data);
     setIsLoading(false);
   }
@@ -103,7 +145,7 @@ const ProducerCampaignDetails = () => {
           </div>
         
 
-          <div>
+          <>
             <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Additonal Info</h4>
               <div className="mt-[20px] flex flex-col gap-4">
                   <FormField 
@@ -146,10 +188,25 @@ const ProducerCampaignDetails = () => {
                   btnType="button"
                   title="Ready to Release"
                   styles="w-full bg-[#1dc071]"
-                  handleClick={handleMint} // Call SM NFT
+                  handleClick={handleMint} // Call cascade / series of tx to mint, approve, lock NFT ERC721
                 />
               </div>
-          </div>
+          </>
+
+          <>
+          <h1>Minted NFT card, appera only after NFT is minted</h1>
+          </>
+
+          <>
+            <div className="mt-[20px]">
+              <CustomButton 
+                btnType="button"
+                title="Share the Ownership"
+                styles="w-full bg-[#1dc071]"
+                handleClick={handleShareOwnership} // Call cascade / series of tx to mint, deposit, distribute ERC20 tokens
+              />
+            </div>    
+          </>
         </div>  
         
       </div>

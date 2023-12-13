@@ -10,6 +10,8 @@ contract NFTMovie is ERC721Base {
 
     struct NFT {
         uint256 tokenID;
+        string title;
+        string description;
         string movieURI;
         address producer;
     }
@@ -46,7 +48,7 @@ contract NFTMovie is ERC721Base {
         _setTokenURI(newTokenId, _tokenURI);
     }
 
-    function createNFTMovie(string memory _movieURI) public onlyProducer {
+    function createNFTMovie(string memory _title, string memory _description,string memory _movieURI) public onlyProducer {
         //create NFTMovie
         _create(_movieURI);
 
@@ -54,6 +56,8 @@ contract NFTMovie is ERC721Base {
         NFT storage idToNFT = idToNFTs[_tokenIdCounter];
 
         idToNFT.tokenID = _tokenIdCounter;
+        idToNFT.title = _title;
+        idToNFT.description = _description;
         idToNFT.movieURI = _movieURI;
         idToNFT.producer = _producer;
     }
