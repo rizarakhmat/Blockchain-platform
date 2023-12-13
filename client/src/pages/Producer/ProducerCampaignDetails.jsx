@@ -31,15 +31,18 @@ const ProducerCampaignDetails = () => {
     uri: ''
   });
 
+  const [nftMinted, setNFTMinted] = useState(false);
+
   const handleMint = async () => {
     setIsLoading(true);
-    await onMintClick(state.title, state.description, form.uri);
+    //await onMintClick(state.title, state.description, form.uri);
     console.log("NFTMovie is minted");
     
-    await approveSC();
+    //await approveSC();
     
-    await lockNFT();
+    //await lockNFT();
     setIsLoading(false);
+    setNFTMinted(true);
   }
 
   const processDonators = (donators) => {
@@ -53,7 +56,7 @@ const ProducerCampaignDetails = () => {
 
   const handleShareOwnership = async () => {
     setIsLoading(true);
-    await mintERC20Tokens(10); // hardcoded
+    /* await mintERC20Tokens(10); // hardcoded
 
     await approveTokenSC(10); // hardcoded
 
@@ -66,7 +69,7 @@ const ProducerCampaignDetails = () => {
         const floatValue = parseFloat(donation);
         return floatValue.toString();
       })
-      );
+      ); */
     setIsLoading(false);
   }
 
@@ -176,39 +179,46 @@ const ProducerCampaignDetails = () => {
                   handleChange={(e) => handleFormFieldChange('uri', e)}
                 />
               </div>
-
-              <div className="my-[20px] w-full flex items-center p-4 bg-[#8c6dfd] h-[120px] rounded-[10px]">
-                <img src={money} alt="money" className="w-[40px] h-[40px] object-contain"/>
-                <h4 className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4 ">Ready to release?</h4>
-                <p className="font-epilogue font-normal text-white ml-[20px]">Share the ownership with other buyers.</p>
-              </div>
-
-              <div className="mt-[20px]">
-                <CustomButton 
-                  btnType="button"
-                  title="Ready to Release"
-                  styles="w-full bg-[#1dc071]"
-                  handleClick={handleMint} // Call cascade / series of tx to mint, approve, lock NFT ERC721
-                />
-              </div>
           </>
 
-          <>
-          <h1>Minted NFT card, appera only after NFT is minted</h1>
-          </>
+          <div>
+            {!nftMinted ? (
+              <CustomButton 
+                btnType="button"
+                title="Ready to Release"
+                styles="w-full bg-[#1dc071]"
+                handleClick={handleMint} // Call cascade / series of tx to mint, approve, lock NFT ERC721
+              />
+            ) : (
+              <></>
+            )}
+          </div>
 
-          <>
-            <div className="mt-[20px]">
+          <div className="my-[10px] w-full flex items-center p-4 bg-[#8c6dfd] h-[130px] rounded-[10px]">
+            <img src={money} alt="money" className="w-[40px] h-[40px] object-contain"/>
+            {nftMinted ? (
+              <div>
+                 <p className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4">NFT of the movie "{state.title}" is minted! It is time to distibute the fractions.</p>
+              </div>
+            ) : (
+              <h4 className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4">First release the movie as NFT and then share the fractions of NFT with funders according to their investments!</h4>             
+            )}
+          </div>
+
+          <div>
+            {nftMinted ? (
               <CustomButton 
                 btnType="button"
                 title="Share the Ownership"
                 styles="w-full bg-[#1dc071]"
                 handleClick={handleShareOwnership} // Call cascade / series of tx to mint, deposit, distribute ERC20 tokens
               />
-            </div>    
-          </>
-        </div>  
+            ) : (
+              <></>
+            )}
+          </div>
         
+         </div> 
       </div>
     </div>
   )
