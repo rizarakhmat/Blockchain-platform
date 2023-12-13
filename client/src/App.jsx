@@ -2,7 +2,7 @@ import React from 'react'
 import { Route, Routes } from 'react-router-dom';
 
 import { NavbarProducer, SidebarProducer } from './components';
-import { Home, Profile, CampaignDetails, CreateCampaign, BroadcasterProfile, ProducerCampaignDetails, BroadcasterCampaignDetails } from './pages';
+import { Signup, Home, Profile, CampaignDetails, CreateCampaign, BroadcasterProfile, ProducerCampaignDetails, BroadcasterCampaignDetails } from './pages';
 const App = () => {
   return (
     <div className='relative sm:-8 p-4 bg-[#f9fcff] min-h-screen flex flex-row'>
@@ -14,6 +14,7 @@ const App = () => {
         <NavbarProducer />
 
         <Routes>
+          <Route path="/signup" element={<Signup />}/>
           <Route path="/" element={<Home />}/>
           <Route path="/producer-profile" element={<Profile />}/>
           <Route path="/create-campaign" element={<CreateCampaign />}/>

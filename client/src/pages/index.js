@@ -5,3 +5,6 @@ export { default as ProducerCampaignDetails } from './Producer/ProducerCampaignD
 export { default as CampaignDetails } from './CampaignDetails';
 export { default as BroadcasterProfile } from './Broadcaster/BroadcasterProfile';
 export { default as BroadcasterCampaignDetails } from './Broadcaster/BroadcasterCampaignDetails';
+
+// AUTH
+export { default as Signup } from './Auth/Signup';

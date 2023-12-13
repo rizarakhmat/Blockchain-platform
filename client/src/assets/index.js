@@ -13,6 +13,8 @@ import money from './money.svg';
 import loader from './loader.svg';
 import thirdweb from './thirdweb.png';
 import ebu_logo from './ebu_logo.png';
+import upArrow from './upArrow.png';
+import downArrow from './downArrow.png';
 
 export {
   tagType,
@@ -29,5 +31,7 @@ export {
   money,
   loader,
   thirdweb,
-  ebu_logo
+  ebu_logo,
+  upArrow,
+  downArrow
 };
