@@ -34,6 +34,8 @@ const ProducerCampaignDetails = () => {
   const [nftMinted, setNFTMinted] = useState(false);
 
   const handleMint = async () => {
+    if (nftMinted) return;
+
     setIsLoading(true);
     //await onMintClick(state.title, state.description, form.uri);
     console.log("NFTMovie is minted");

@@ -1,6 +1,6 @@
 import React, { useContext, createContext } from 'react';
 import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS, NFTMOVIETOKEN_ADDRESS, FRACTIONALIZENFT_ADDRESS } from '../constants/addresses'
-import { useAddress, useContract, useMetamask, useContractWrite } from '@thirdweb-dev/react';
+import { useAddress, useContract, useMetamask, useContractWrite, useContractRead } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 
 const StateContext = createContext();
@@ -75,7 +75,18 @@ export const StateContextProvider = ({ children }) => {
     }
   }
 
-    //////////////////////////////// NFTMovieToken ERC20 SC functions
+  
+
+  //////////////////////////////// NFTMovieToken ERC20 SC functions
+
+  const erc20tokens = async () => {
+    const data = await nftMovieTokenContract.call(
+      'balanceOf', 
+      [address]
+    );
+
+    return data.toNumber();
+  }
 
   const mintERC20Tokens = async (amount) => {
     try {
@@ -274,6 +285,7 @@ export const StateContextProvider = ({ children }) => {
       value={{
         address,
         contract,
+        nftMovieTokenContract,
         //CrowdFunding
         connect,
         createCampaign: publishCampaign,
@@ -288,6 +300,7 @@ export const StateContextProvider = ({ children }) => {
         //ERC20 NFTMovieToken
         mintERC20Tokens,
         approveTokenSC,
+        erc20tokens,
         //FractionalizeNFT
         lockNFT,
         depositTokens,

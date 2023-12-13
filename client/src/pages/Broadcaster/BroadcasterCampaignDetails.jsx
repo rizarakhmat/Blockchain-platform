@@ -11,10 +11,11 @@ import { profile, money } from '../../assets'
 const BroadcasterCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { getDonations, contract, address } = useStateContext();
+  const { erc20tokens, getDonations, contract, nftMovieTokenContract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
+  const [numberOfTokens, setNumberOfTokens] = useState();
 
   const [countries, setCountries] = useState([{ id: 0, value: '' }]);
   const [count, setCount] = useState(1);
@@ -41,9 +42,20 @@ const BroadcasterCampaignDetails = () => {
     setIsLoading(false);
   }
 
+  const fetchNumberOfTokens = async () => {
+    setIsLoading(true);
+    let tokens = await erc20tokens();
+    setNumberOfTokens(tokens);
+    setIsLoading(false);
+  }
+
   useEffect(() => {
     if(contract) fetchDonators();
   }, [contract, address])
+
+  useEffect(() => {
+    if(nftMovieTokenContract) fetchNumberOfTokens(); 
+  }, [nftMovieTokenContract, address])
 
   // Functions to update country list
   const handleAddCountry = () => {
@@ -104,6 +116,20 @@ const BroadcasterCampaignDetails = () => {
       <div className="mt-[60px] flex lg:flex-row flex-col gap-5">
         <div className="flex-[2] flex flex-col gap-[40px]">
           <div>
+            {numberOfTokens > 0 ? (
+              <>
+                <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Ownership</h4>
+
+                <div className="mt-[20px]">
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You are the owner of {(numberOfTokens * 100) / 10} % of the "{state.title}" NFT. Now you can set up the Distribution Agreement.</p>
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
+
+          <div>
             <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Creator</h4>
 
             <div className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px]">
@@ -138,92 +164,104 @@ const BroadcasterCampaignDetails = () => {
               </div>
           </div>
 
-          <div>
-            <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Distribution Agreement Info</h4>
-
-              <div>
-                <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Distributor Info</h4>
-
-                <div> 
-                  <div className="mt-[20px] flex flex-col gap-4">
-                    <FormField 
-                      labelName="Distributor Name *"
-                      placeholder="Name of Distributor company"
-                      inputType="text"
-                      value={form.name}
-                      handleChange={(e) => handleFormFieldChange('name', e)}
-                    />
-                  </div>
-                  <div className="mt-[20px] flex flex-col gap-4">
-                    <FormField 
-                      labelName="Price paid by Distributor *"
-                      placeholder="ETH 0.01"
-                      inputType="text"
-                      value={form.price}
-                      handleChange={(e) => handleFormFieldChange('price', e)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase mt-[20px]">Time Window</h4>
-
-                <div className="mt-[20px] flex flex-col gap-4">
-                    <FormField 
-                      labelName="Distribution start date *"
-                      placeholder="Start Date"
-                      inputType="date"
-                      value={form.startDate}
-                      handleChange={(e) => handleFormFieldChange('startDate', e)}
-                    />
-                </div>
-
-                <div className="mt-[20px] flex flex-col gap-4">
-                    <FormField 
-                      labelName="Distribution end date *"
-                      placeholder="End Date"
-                      inputType="date"
-                      value={form.deadline}
-                      handleChange={(e) => handleFormFieldChange('deadline', e)}
-                    />
-                </div>
-
+          <>
+            {numberOfTokens > 0 ? ( 
                 <div>
-                  <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase mt-[20px]">Country List</h4>
+                  <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Distribution Agreement Info</h4>
                   <div>
-                    {countries.map((country) => (
-                      <div key={country.id} className="mt-[20px] flex flex-row justify-between">
+                    <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Distributor Info</h4>
+    
+                    <div> 
+                      <div className="mt-[20px] flex flex-col gap-4">
                         <FormField 
-                          labelName="Country Name *"
-                          placeholder="Enter country"
+                          labelName="Distributor Name *"
+                          placeholder="Name of Distributor company"
                           inputType="text"
-                          value={country.value}
-                          handleChange={(e) => handleCountryChangeForm(country.id, e.target.value)}
+                          value={form.name}
+                          handleChange={(e) => handleFormFieldChange('name', e)}
                         />
-                        <div className="mt-[30px] ml-[10px]">
-                          <CustomButton 
-                            btnType="button"
-                            title="+"
-                            styles="w-[48px] h-[48px] bg-[#b2b3bd]"
-                            handleClick={handleAddCountry}
-                          />
-                        </div>
                       </div>
-                    ))}
+                      <div className="mt-[20px] flex flex-col gap-4">
+                        <FormField 
+                          labelName="Price paid by Distributor *"
+                          placeholder="ETH 0.01"
+                          inputType="text"
+                          value={form.price}
+                          handleChange={(e) => handleFormFieldChange('price', e)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+    
+                  <div>
+                    <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase mt-[20px]">Time Window</h4>
+    
+                    <div className="mt-[20px] flex flex-col gap-4">
+                        <FormField 
+                          labelName="Distribution start date *"
+                          placeholder="Start Date"
+                          inputType="date"
+                          value={form.startDate}
+                          handleChange={(e) => handleFormFieldChange('startDate', e)}
+                        />
+                    </div>
+    
+                    <div className="mt-[20px] flex flex-col gap-4">
+                        <FormField 
+                          labelName="Distribution end date *"
+                          placeholder="End Date"
+                          inputType="date"
+                          value={form.deadline}
+                          handleChange={(e) => handleFormFieldChange('deadline', e)}
+                        />
+                    </div>
+    
+                    <div>
+                      <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase mt-[20px]">Country List</h4>
+                      <div>
+                        {countries.map((country) => (
+                          <div key={country.id} className="mt-[20px] flex flex-row justify-between">
+                            <FormField 
+                              labelName="Country Name *"
+                              placeholder="Enter country"
+                              inputType="text"
+                              value={country.value}
+                              handleChange={(e) => handleCountryChangeForm(country.id, e.target.value)}
+                            />
+                            <div className="mt-[30px] ml-[10px]">
+                              <CustomButton 
+                                btnType="button"
+                                title="+"
+                                styles="w-[48px] h-[48px] bg-[#b2b3bd]"
+                                handleClick={handleAddCountry}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+    
+                  <div className="mt-[20px]">
+                    <CustomButton 
+                      btnType="button"
+                      title="Set Distribution aggrement"
+                      styles="w-full bg-[#1dc071]"
+                      //handleClick={} // Call SM NFT
+                    />
+                  </div>
               </div>
+            ) : (
+              <>
+                <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Distribution Agreement Info</h4>
 
-              <div className="mt-[20px]">
-                <CustomButton 
-                  btnType="button"
-                  title="Set Distribution aggrement"
-                  styles="w-full bg-[#1dc071]"
-                  //handleClick={} // Call SM NFT
-                />
-              </div>
-          </div>
+                <div className="mt-[20px]">
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You could be able to set up the Distribution Agreement after you will become the owner of the NFT fraction.</p>
+                </div>
+              </>
+            )}
+          </>
+
         </div>  
         
       </div>
