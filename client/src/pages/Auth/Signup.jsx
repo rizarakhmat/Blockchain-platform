@@ -72,7 +72,6 @@ const Signup = () => {
             ref={userRef}
             autoComplete="off"
             handleChange={(e) => setUser(e.target.value)}
-            required
             aria-invalid={validName ? "false" : "true"}
           />
 
@@ -81,7 +80,6 @@ const Signup = () => {
             inputType="password"
             value={pwd}
             handleChange={(e) => setPwd(e.target.value)}
-            required
             aria-invalid={validPwd ? "false" : "true"}
           />
 
@@ -90,7 +88,6 @@ const Signup = () => {
             inputType="password"
             value={matchPwd}
             handleChange={(e) => setMatchPwd(e.target.value)}
-            required
             aria-invalid={validMatch ? "false" : "true"}
           />
 

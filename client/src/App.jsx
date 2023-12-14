@@ -2,7 +2,7 @@ import React from 'react'
 import { Route, Routes } from 'react-router-dom';
 
 import { NavbarProducer, SidebarProducer } from './components';
-import { Login, Signup, Payment, Home, Profile, CampaignDetails, CreateCampaign, BroadcasterProfile, ProducerCampaignDetails, BroadcasterCampaignDetails, DistributorCampaignDetails, DistributorReadyToStreamCampaigns } from './pages';
+import { Login, Signup, Payment, Home, Profile, CampaignDetails, CreateCampaign, BroadcasterProfile, ProducerCampaignDetails, BroadcasterCampaignDetails, DistributorCampaignDetails, DistributorProfile } from './pages';
 const App = () => {
   return (
     <div>
@@ -21,10 +21,15 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/producer-profile" element={<Profile />} />
+                <Route path="/create-campaign" element={<CreateCampaign />}/>
+                <Route path="/producer-campaign-details/:id" element={<ProducerCampaignDetails />}/>
 
+                <Route path="/broadcaster-profile" element={<BroadcasterProfile />}/>
+                <Route path="/campaign-details/:id" element={<CampaignDetails />}/>
+                <Route path="/broadcaster-campaign-details/:id" element={<BroadcasterCampaignDetails />}/>
 
+                <Route path="/distributor-profile" element={<DistributorProfile />}/>
                 <Route path="/distributor-campaign-details" element={<DistributorCampaignDetails />} />
-                <Route path="/distributor-campaigns-ready" element={<DistributorReadyToStreamCampaigns />} />
               </Routes>
               </div>
 

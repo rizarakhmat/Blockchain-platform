@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
 import { useStateContext } from '../../context'
-import { BroadcasterDisplayCampaigns } from '../../components/Broadcaster'
+import { DistributorDisplayCampaigns } from '../../components/Distributor'
 
 const DistributorProfile = () => {
   const { address, contract, getUserFundedCampaigns } = useStateContext();
@@ -22,11 +22,13 @@ const DistributorProfile = () => {
 
   return (
     <>
-      <BroadcasterDisplayCampaigns 
+      <DistributorDisplayCampaigns 
         title="My Funded Campaigns"
         isLoading={isLoading}
         campaigns={campaigns}
       />
+
+      {/* Display campaigns Distributor has streaming right for */}
     </>
   )
 }

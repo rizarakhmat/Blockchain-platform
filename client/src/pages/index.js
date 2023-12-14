@@ -7,7 +7,6 @@ export { default as BroadcasterProfile } from './Broadcaster/BroadcasterProfile'
 export { default as BroadcasterCampaignDetails } from './Broadcaster/BroadcasterCampaignDetails';
 export { default as DistributorProfile } from './Disctibutor/DistributorProfile';
 export { default as DistributorCampaignDetails } from './Disctibutor/DistributorCampaignDetails';
-export { default as DistributorReadyToStreamCampaigns } from './Disctibutor/DistributorReadyToStreamCampaigns';
 
 // AUTH
 export { default as Signup } from './Auth/Signup';

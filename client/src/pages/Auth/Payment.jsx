@@ -48,7 +48,6 @@ const Payment = () => {
             value={state.number}
             handleChange={(e) => handleInputChange('number', e)}
             onFocus={handleInputFocus}
-            required
           />
 
           <FormField 
@@ -58,7 +57,6 @@ const Payment = () => {
             value={state.name}
             handleChange={(e) => handleInputChange('name', e)}
             onFocus={handleInputFocus}
-            required
           />
 
           <FormField 
@@ -68,7 +66,6 @@ const Payment = () => {
             value={state.expiry}
             handleChange={(e) => handleInputChange('expiry', e)}
             onFocus={handleInputFocus}
-            required
           />
 
           <FormField 
@@ -80,7 +77,6 @@ const Payment = () => {
             value={state.cvc}
             handleChange={(e) => handleInputChange('cvc', e)}
             onFocus={handleInputFocus}
-            required
           />
 
           <div className="flex justify-center items-center">

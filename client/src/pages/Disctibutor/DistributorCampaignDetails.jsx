@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useStateContext } from '../../context'
-import { CustomButton } from '../../components/Producer'
+import { CustomButton, FormField } from '../../components/Producer'
 import { Loader, CountBox } from '../../components'
 import { calculateTimeLeft } from '../../utils'
 import { profile, money } from '../../assets'
@@ -85,7 +85,7 @@ const DistributorCampaignDetails = () => {
                 <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Streaming right possession</h4>
 
                 <div className="mt-[20px]">
-                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You have the right to stream "{state.title}" movie.</p>
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You have the right to stream {/* "{state.title}" */} movie.</p>
                 </div>
               </>
             ) : (
@@ -98,7 +98,6 @@ const DistributorCampaignDetails = () => {
 
             <div className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px]">
               <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] break-all">{/* {state.owner} */}OWNER</h4>
-              <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]"># Campaigns</p>
             </div>
           </div>
 
@@ -124,66 +123,87 @@ const DistributorCampaignDetails = () => {
           </div>
 
           <>
-                <div>
-                  <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Distribution Agreement</h4>
-                  
-                  <div>
-                    <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase mt-[20px]">Time Window</h4>
-                    <div className="mt-[20px]">
-                      <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">12-01-2023</p>
-                      <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">12-31-2023</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase mt-[20px]">Country list</h4>
-                    <div className="mt-[20px]">
-                      <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">Italy</p>
-                      <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">France</p>
-                    </div>
-                  </div>
-
-
-    
-                  <form /* onSubmit={}  */ className='flex-1 mt-[10px]'>
-                  <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Royalties remuneration</h4>
-
-                  <div>
-                    <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase mt-[20px]"># users</h4>
-                    <div className="mt-[20px]">
-                      <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">1 000 000</p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-[20px] flex flex-col p-4 bg-[#e6e8eb] rounded-[10px]">
-                    <p className="font-epilogue fount-medium text-[20px] leading-[30px] text-center text-[#808191]">
-                      Payment of the royalties back to the funders of the movie
-                    </p>
-                    <div className="mt-[30px]">
-                      <input 
-                        type="number"
-                        placeholder="ETH 0.1"
-                        step="0.01"
-                        className="w-full py-[10px] sm:px-[20px] px-[15px] outline-none border-[1px] border-[#3a3a43] bg-transparent font-epilogue text-[#808191] text-[18px] leading-[30px] placeholder:text-[#4b5264] rounded-[10px] mb-[30px]"
-                        //value={amount}
-                        //onChange={(e) => setAmount(e.target.value)}
-                      />
-
-                      <CustomButton 
-                        btnType="button"
-                        title="Pay royalties"
-                        styles="w-full bg-[#8c6dfd]"
-                        //handleClick={}
-                      />
-                    </div>
-                  </div>
-                  </form>
-
+            <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase">Streaming right</h4>
+            <div className='flex lg:flex-row flex-col gap-5'>
+            <div className='flex-[0.8] flex-col gap-[40px]'>
+              <div>
+                <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Time Window</h4>
+                <div className="mt-[10px]">
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">12-01-2023</p>
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">12-31-2023</p>
+                </div>
               </div>
-          </>
 
+              <div className="mt-[20px]">
+                <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Country list</h4>
+                <div className="mt-[10px]">
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">Italy</p>
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">France</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1">
+              {/* <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Streaming right</h4> */}   
+
+              <div className="mt-[20px] flex flex-col p-4 bg-[#e6e8eb] rounded-[10px]">
+                <p className="font-epilogue fount-medium text-[20px] leading-[30px] text-center text-[#808191]">
+                  Price requested to redeem the streaming right
+                </p>
+                <p className="font-epilogue font-bold sm:text-[25px] text-[18px] leading-[38px] text-center text-[#1dc071] mt-[10px]">€100 000</p>
+                <div className="w-full mt-[10px]">
+                  <CustomButton 
+                    btnType="button"
+                    title="Buy"
+                    styles="w-full bg-[#8c6dfd]"
+                    //handleClick={}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            </div>
+    
+            <form /* onSubmit={}  */ className='flex-1 mt-[20px]'>
+              <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Royalties remuneration</h4>
+                <div className="mt-[20px]">
+                  <FormField 
+                    labelName="Numbers of users"
+                    placeholder="Enter # users"
+                    inputType="text"
+                    inputMode="numeric"
+                    //value={state.number}
+                    //handleChange={(e) => handleInputChange('number', e)}
+                  />
+                </div>
+              
+              <div>
+                <div className="mt-[20px] flex flex-col p-4 bg-[#e6e8eb] rounded-[10px]">
+                  <p className="font-epilogue fount-medium text-[20px] leading-[30px] text-center text-[#808191]">
+                    Payment of the royalties back to the funders of the movie
+                  </p>
+                  <div className="mt-[30px]">
+                    <input 
+                      type="number"
+                      placeholder="ETH 0.1"
+                      step="0.01"
+                      className="w-full py-[10px] sm:px-[20px] px-[15px] outline-none border-[1px] border-[#3a3a43] bg-transparent font-epilogue text-[#808191] text-[18px] leading-[30px] placeholder:text-[#4b5264] rounded-[10px] mb-[30px]"
+                      //value={amount}
+                      //onChange={(e) => setAmount(e.target.value)}
+                    />
+
+                    <CustomButton 
+                      btnType="button"
+                      title="Pay royalties"
+                      styles="w-full bg-[#1dc071]"
+                      //handleClick={}
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </>
         </div>  
-        
       </div>
     </div>
   )
