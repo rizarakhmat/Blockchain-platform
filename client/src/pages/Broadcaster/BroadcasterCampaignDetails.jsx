@@ -125,12 +125,12 @@ const BroadcasterCampaignDetails = () => {
                 </div>
               </>
             ) : (
-              <></>
+              null
             )}
           </div>
 
           <div>
-            <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Creator</h4>
+            <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Producer</h4>
 
             <div className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px]">
               <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full bg-[#f9fcff] cursor-pointer">
@@ -167,7 +167,7 @@ const BroadcasterCampaignDetails = () => {
           <>
             {numberOfTokens > 0 ? ( 
                 <div>
-                  <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Distribution Agreement Info</h4>
+                  <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Distribution Agreement</h4>
                   <div>
                     <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Distributor Info</h4>
     
@@ -253,7 +253,7 @@ const BroadcasterCampaignDetails = () => {
               </div>
             ) : (
               <>
-                <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Distribution Agreement Info</h4>
+                <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Distribution Agreement</h4>
 
                 <div className="mt-[20px]">
                   <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You could be able to set up the Distribution Agreement after you will become the owner of the NFT fraction.</p>

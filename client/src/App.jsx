@@ -2,11 +2,42 @@ import React from 'react'
 import { Route, Routes } from 'react-router-dom';
 
 import { NavbarProducer, SidebarProducer } from './components';
-import { Signup, Home, Profile, CampaignDetails, CreateCampaign, BroadcasterProfile, ProducerCampaignDetails, BroadcasterCampaignDetails } from './pages';
+import { Login, Signup, Payment, Home, Profile, CampaignDetails, CreateCampaign, BroadcasterProfile, ProducerCampaignDetails, BroadcasterCampaignDetails, DistributorCampaignDetails, DistributorReadyToStreamCampaigns } from './pages';
 const App = () => {
   return (
-    <div className='relative sm:-8 p-4 bg-[#f9fcff] min-h-screen flex flex-row'>
-      <div className='sm:flex hidden mr-10 relative'>
+    <div>
+      <Routes>
+        {/* Common layout with Navbar and Sidebar */}
+        <Route
+          path="*"
+          element={
+            <div className='relative sm:-8 p-4 bg-[#f9fcff] min-h-screen flex flex-row'>
+              <div className='sm:flex hidden mr-10 relative'>
+                <SidebarProducer />
+              </div>
+
+              <div className='flex-1 max-sm:w-full max-w-[1280px] mx-auto sm:pr-5'>
+              <NavbarProducer />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/producer-profile" element={<Profile />} />
+
+
+                <Route path="/distributor-campaign-details" element={<DistributorCampaignDetails />} />
+                <Route path="/distributor-campaigns-ready" element={<DistributorReadyToStreamCampaigns />} />
+              </Routes>
+              </div>
+
+            </div>
+          }
+        />
+        {/* Route for Signup without Navbar and Sidebar */}
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/payment" element={<Payment />} />
+      </Routes>
+
+      {/* <div className='sm:flex hidden mr-10 relative'>
         <SidebarProducer />
       </div>
 
@@ -25,7 +56,7 @@ const App = () => {
           <Route path="/broadcaster-campaign-details/:id" element={<BroadcasterCampaignDetails />}/>
 
         </Routes>
-      </div>
+      </div> */}
     </div>
   )
 }

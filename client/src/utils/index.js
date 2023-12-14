@@ -20,3 +20,20 @@ export const checkIfImage = (url, callback) => {
   img.onload = () => callback(true);
   img.onerror = () => callback(false);
 };
+
+export const calculateTimeLeft = (startDate, deadline) => {
+  const now = new Date().getTime();
+  const endTime = new Date(deadline).getTime();
+  const startTime = new Date(startDate).getTime();
+
+  if (now <= startTime) {
+    return 0; // If the current time is before or at the start time, return 0%
+  } else if (now >= endTime) {
+    return 100; // If the current time is at or past the end time, return 100%
+  } else {
+    const totalTime = endTime - startTime;
+    const elapsedTime = now - startTime;
+    const percentage = (elapsedTime / totalTime) * 100;
+    return percentage.toFixed(2); // Return the percentage with two decimal places
+  }
+}

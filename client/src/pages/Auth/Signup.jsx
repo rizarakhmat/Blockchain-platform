@@ -4,11 +4,9 @@ import { CustomButton, FormField, Dropdown } from '../../components/Producer'
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
-const REGISTER_URL = '/signup';
 
 const Signup = () => {
   const userRef = useRef();
-  const errRef = useRef();
   const navigate = useNavigate();
 
   const [user, setUser] = useState('');
@@ -21,7 +19,6 @@ const Signup = () => {
   const [validMatch, setValidMatch] = useState(false);
 
   const [errMsg, setErrMsg] = useState('');
-  const [success, setSuccess] = useState(false);
 
   const [role, setRole] = useState('');
   const options = [
@@ -47,6 +44,16 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const v1 = USER_REGEX.test(user);
+    const v2 = PWD_REGEX.test(pwd);
+
+    if (!v1 || !v2) {
+        setErrMsg("Invalid Entry");
+        console.log(errMsg);
+      }
+    
+      navigate('/payment');
   }
 
   const handleRole = (e) => {
@@ -54,12 +61,11 @@ const Signup = () => {
   }
 
   return (
-    <div className='flex justify-center items-center'>
+    <div className='flex justify-center items-center mt-[100px]'>
       <div>
         <h1 className="font-epilogue font-bold sm:text-[25px] text-[18px] leading-[38px] text-[#1dc071]">Signup</h1>
         <form onSubmit={handleSubmit} className='w-[420px] h-[400px] mt-[15px] flex flex-col flex-start gap-[10px]'>
           <FormField 
-            labelName="email"
             placeholder="Email"
             inputType="text"
             value={user}
@@ -71,7 +77,6 @@ const Signup = () => {
           />
 
           <FormField 
-            labelName="Password"
             placeholder="Create password"
             inputType="password"
             value={pwd}
@@ -81,7 +86,6 @@ const Signup = () => {
           />
 
           <FormField
-            labelName="Confirm Password"
             placeholder="Repeat password"
             inputType="password"
             value={matchPwd}
@@ -107,12 +111,11 @@ const Signup = () => {
           </div>
         </form>
 
-      <div className="mt-[50px]">
+      <div className="mt-[30px]">
         <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll">
             Already registered?<br />
             <span className="underline decoration-gray-500">
-                {/*put router link here*/}
-                <a href="#">Sign In</a>
+                <a href="/login">Sign In</a>
             </span>
         </p>
       </div>

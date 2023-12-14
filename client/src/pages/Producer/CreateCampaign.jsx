@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { ethers } from 'ethers'
 
 import { useStateContext } from '../../context'
-import { money } from '../../assets'
 import { checkIfImage } from '../../utils'
 import { CustomButton, FormField } from '../../components/Producer'
 import { Loader } from '../../components'
