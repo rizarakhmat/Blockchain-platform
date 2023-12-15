@@ -43,7 +43,7 @@ export const StateContextProvider = ({ children }) => {
         args: [
           title,
           description,
-          image //hardcoded2
+          image
         ],
         overrides: {
           gasLimit: 1000000,
@@ -137,6 +137,7 @@ export const StateContextProvider = ({ children }) => {
         },
       });
       tokenId++; // the next approve() call tokenId point to correct NFT;
+      console.log(`tokenId: ${tokenId}`);
       console.info("FractionalizeNFT contract lockNFTMovie() call successs", data);
     } catch (err) {
       console.error("FractionalizeNFT contract lockNFTMovie() failure", err);
@@ -147,7 +148,6 @@ export const StateContextProvider = ({ children }) => {
     try {
       const data = await depositERC20({
         args: [
-          FRACTIONALIZENFT_ADDRESS,
           amount
         ],
         overrides: {

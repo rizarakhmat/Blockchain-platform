@@ -43,16 +43,16 @@ contract FractionalizeNFT is IERC721Receiver {
 
   /// ERC20
 
-  function depositERC20(address _addressERC20, uint256 _amount) external payable { // _addressERC20 => nftMovieToken
-    uint256 balanceBefore = IERC20(_addressERC20).balanceOf(address(this));
+  function depositERC20(uint256 _amount) external payable { // _addressERC20 => nftMovieToken
+    uint256 balanceBefore = IERC20(nftMovieToken).balanceOf(address(this));
 
-    IERC20(_addressERC20).transferFrom(
+    IERC20(nftMovieToken).transferFrom(
       msg.sender,
       address(this),
       _amount
     );
   
-    uint256 actualAmount = IERC20(_addressERC20).balanceOf(address(this)) - balanceBefore;
+    uint256 actualAmount = IERC20(nftMovieToken).balanceOf(address(this)) - balanceBefore;
 
     totalBalance += actualAmount;
   }

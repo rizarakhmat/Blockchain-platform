@@ -42,13 +42,12 @@ contract NFTMovie is ERC721Base {
     }
 
     function _create(string memory _tokenURI) internal {
-        _tokenIdCounter++;
         uint256 newTokenId = _tokenIdCounter;
         super.mintTo(msg.sender, _tokenURI);
         _setTokenURI(newTokenId, _tokenURI);
     }
 
-    function createNFTMovie(string memory _title, string memory _description,string memory _movieURI) public onlyProducer {
+    function createNFTMovie(string memory _title, string memory _description,string memory _movieURI) public onlyProducer returns (uint256) {
         //create NFTMovie
         _create(_movieURI);
 
@@ -60,6 +59,10 @@ contract NFTMovie is ERC721Base {
         idToNFT.description = _description;
         idToNFT.movieURI = _movieURI;
         idToNFT.producer = _producer;
+
+        _tokenIdCounter++;
+
+        return _tokenIdCounter - 1;
     }
 
      function getNFT(uint256 _id) view public returns (NFT memory) {

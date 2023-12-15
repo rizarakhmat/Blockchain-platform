@@ -37,12 +37,11 @@ const ProducerCampaignDetails = () => {
     if (nftMinted) return;
 
     setIsLoading(true);
-    //await onMintClick(state.title, state.description, form.uri);
-    console.log("NFTMovie is minted");
+    await onMintClick(state.title, state.description, form.uri);
     
-    //await approveSC();
+    await approveSC();
     
-    //await lockNFT();
+    await lockNFT();
     setIsLoading(false);
     setNFTMinted(true);
   }
@@ -58,7 +57,7 @@ const ProducerCampaignDetails = () => {
 
   const handleShareOwnership = async () => {
     setIsLoading(true);
-    /* await mintERC20Tokens(10); // hardcoded
+    await mintERC20Tokens(10); // hardcoded
 
     await approveTokenSC(10); // hardcoded
 
@@ -71,7 +70,7 @@ const ProducerCampaignDetails = () => {
         const floatValue = parseFloat(donation);
         return floatValue.toString();
       })
-      ); */
+      );
     setIsLoading(false);
   }
 
@@ -187,7 +186,7 @@ const ProducerCampaignDetails = () => {
             {!nftMinted ? (
               <CustomButton 
                 btnType="button"
-                title="Ready to Release"
+                title={nftMinted ? "Released" : "Ready to Release" }
                 styles="w-full bg-[#1dc071]"
                 handleClick={handleMint} // Call cascade / series of tx to mint, approve, lock NFT ERC721
               />
@@ -200,10 +199,14 @@ const ProducerCampaignDetails = () => {
             <img src={money} alt="money" className="w-[40px] h-[40px] object-contain"/>
             {nftMinted ? (
               <div>
-                 <p className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4">NFT of the movie "{state.title}" is minted! It is time to distibute the fractions.</p>
+                 <h4 className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4">NFT of the movie "{state.title}" is minted!</h4>
+                 <p className="font-epilogue font-normal leading-[22px] text-white p-4">It is time to distibute the fractions.</p>
               </div>
             ) : (
-              <h4 className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4">First release the movie as NFT and then share the fractions of NFT with funders according to their investments!</h4>             
+              <div>
+                <h4 className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4">First release the movie as NFT</h4>
+                 <p className="font-epilogue font-normal leading-[22px] text-white p-4">Then share the fractions of NFT with funders according to their investments!</p>
+              </div>            
             )}
           </div>
 
