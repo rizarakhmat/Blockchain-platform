@@ -8,8 +8,10 @@ const DistributorDisplayCampaigns = ({ title, isLoading, campaigns }) => {
   const navigate = useNavigate();
 
   const handleNavigate = (campaign) => {
+    //const combinedInfo = { campaign, timeCountryInfo };
+    //{ state: combinedInfo }
     navigate(`/distributor-campaign-details/${campaign.title}`, { state: campaign })
-  }
+  } 
 
   
   return (
