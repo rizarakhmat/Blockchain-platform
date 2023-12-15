@@ -41,9 +41,10 @@ contract FractionalizeNFT is IERC721Receiver {
     _;
   }
 
-  /// ERC20
+  /////////////////////////////////// ERC20 ////////////////////
 
-  function depositERC20(uint256 _amount) external payable { // _addressERC20 => nftMovieToken
+  // send(lock) erc20 tokens from FractionToken to this SC
+  function depositERC20(uint256 _amount) external payable {
     uint256 balanceBefore = IERC20(nftMovieToken).balanceOf(address(this));
 
     IERC20(nftMovieToken).transferFrom(
@@ -57,12 +58,15 @@ contract FractionalizeNFT is IERC721Receiver {
     totalBalance += actualAmount;
   }
 
+  // internal function that send erc20 token from this SC to reciver
   function sendERC20Token (address _to, uint256 _amount) internal {
     require(_amount > 0, "_amount should be > 0");
 
     nftMovieToken.safeTransfer(_to, _amount);
   }
 
+
+  // function that airdrop erc20 tokens from this SC to [] addresses
   function distributeERC20Tokens(uint256 _amount, address[] memory _buyers, uint256[] memory _donations) public onlyProducer {
     //update mapping
     LockedNFTMovie storage idToNFT = idToNFTs[_lockedNFTIdCounter];
@@ -86,8 +90,9 @@ contract FractionalizeNFT is IERC721Receiver {
     }
   }
 
-  /// ERC721
+  ////////////////////////////////// ERC721  ///////////////////////////
 
+  // send (lock) erc721 nft from NFTMovie to this SC 
   function lockNFTMovie(uint256 _tokenId) external onlyProducer {
     require(nftMovie.ownerOf(_tokenId) == msg.sender, "You don't own this NFT!");
 
@@ -106,6 +111,8 @@ contract FractionalizeNFT is IERC721Receiver {
     _lockedNFTIdCounter++;
   }
 
+  ///////////////////////////////////// read functions //////////////////////
+  
   function getLockedNFT(uint256 _id) view public returns (LockedNFTMovie memory) {
     return (idToNFTs[_id]);
   }

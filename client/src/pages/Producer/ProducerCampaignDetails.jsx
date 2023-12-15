@@ -183,16 +183,13 @@ const ProducerCampaignDetails = () => {
           </>
 
           <div>
-            {!nftMinted ? (
               <CustomButton 
                 btnType="button"
                 title={nftMinted ? "Released" : "Ready to Release" }
                 styles="w-full bg-[#1dc071]"
                 handleClick={handleMint} // Call cascade / series of tx to mint, approve, lock NFT ERC721
               />
-            ) : (
-              <></>
-            )}
+            
           </div>
 
           <div className="my-[10px] w-full flex items-center p-4 bg-[#8c6dfd] h-[130px] rounded-[10px]">
@@ -211,16 +208,12 @@ const ProducerCampaignDetails = () => {
           </div>
 
           <div>
-            {nftMinted ? (
               <CustomButton 
                 btnType="button"
                 title="Share the Ownership"
                 styles="w-full bg-[#1dc071]"
                 handleClick={handleShareOwnership} // Call cascade / series of tx to mint, deposit, distribute ERC20 tokens
               />
-            ) : (
-              <></>
-            )}
           </div>
         
          </div> 

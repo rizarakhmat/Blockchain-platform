@@ -6,7 +6,7 @@ import { ethers } from 'ethers';
 const StateContext = createContext();
 
 export const StateContextProvider = ({ children }) => {
-  let tokenId = 0; // needed to approve();
+  let tokenId = 1; // needed to approve();
 
   const { contract } = useContract(CROWDFUNDING_ADDRESS);
   const { contract: nftMovieContract } = useContract(NFTMOVIE_ADDRESS);
