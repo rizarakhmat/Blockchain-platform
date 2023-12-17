@@ -8,7 +8,7 @@ const BroadcasterDisplayCampaigns = ({ title, isLoading, campaigns }) => {
   const navigate = useNavigate();
 
   const handleNavigate = (campaign) => {
-    navigate(`/broadcaster-campaign-details/${campaign.title}`, { state: campaign })
+    navigate(`broadcaster-campaign-details/${campaign.title}`, { state: campaign })
   }
 
   

@@ -2,11 +2,6 @@ import React, { useState } from 'react'
 import { upArrow, downArrow } from '../../assets'
 
 const Dropdown = ({ labelName, value, options, onChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleOpen = () => {
-    setIsOpen(!isOpen);
-  };
 
   return (
     <label className='flex-1 w-full flex flex-col'>

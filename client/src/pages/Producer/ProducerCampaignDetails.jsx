@@ -10,16 +10,15 @@ import { profile, money } from '../../assets'
 const ProducerCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { contract, address, 
+  const { contract, address, nftMovieContract, nftMovieTokenContract, FractionalizeNFTContract,
         /* CrowdFunding */
         getDonations,
         /* NFTMovie ERC721 */
-        approveSC, onMintClick, 
+        approveSC, onMintClick, getNFTs, tokenID,
         /* NFTMovieToken ERC20 */
-        mintERC20Tokens,
-        approveTokenSC,
+        mintERC20Tokens, approveTokenSC, owners,
         /* FractionalizeNFT */
-        lockNFT, depositTokens, distributeTokens
+        lockNFT, depositTokens, distributeTokens, getLockedNFTs
       } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +31,8 @@ const ProducerCampaignDetails = () => {
   });
 
   const [nftMinted, setNFTMinted] = useState(false);
+  const [nftIsLocked, setNFTIsLocked] = useState(false);
+  const [balance, setBalance] = useState([]);
 
   const handleMint = async () => {
     if (nftMinted) return;
@@ -39,38 +40,45 @@ const ProducerCampaignDetails = () => {
     setIsLoading(true);
     await onMintClick(state.title, state.description, form.uri);
     
-    await approveSC();
+    const mintedNFTid = await tokenID();  
     
-    await lockNFT();
-    setIsLoading(false);
+    await approveSC(mintedNFTid);
+    
+    await lockNFT(mintedNFTid, state.title, state.description, form.uri);
+
     setNFTMinted(true);
+    setIsLoading(false);
   }
 
   const processDonators = (donators) => {
     const funders = donators.map(item => item.donator);
     const donations = donators.map(item => item.donations);
-
+    
     return [funders, donations];
   }
 
   const [funders, donations] = processDonators(donators);
 
   const handleShareOwnership = async () => {
+    if (nftIsLocked) return;
+
     setIsLoading(true);
-    await mintERC20Tokens(10); // hardcoded
+    await mintERC20Tokens(10000); // hardcoded
 
-    await approveTokenSC(10); // hardcoded
+    await approveTokenSC(10000); // hardcoded
 
-    await depositTokens(10); // hardcoded
+    await depositTokens(10000); // hardcoded
 
     await distributeTokens(
-      10,
+      10000,
       funders,
       donations.map(donation => {
         const floatValue = parseFloat(donation);
         return floatValue.toString();
       })
       );
+
+    setNFTIsLocked(true);
     setIsLoading(false);
   }
 
@@ -86,9 +94,67 @@ const ProducerCampaignDetails = () => {
     setIsLoading(false);
   }
 
+  const fetchNFTs = async () => {
+    setIsLoading(true);
+    const nfts = await getNFTs();
+    console.log(nfts);
+    const nftIsInList = nfts.some((nft) => 
+      nft.description === state.description);
+
+    if (nftIsInList) {
+      setNFTMinted(true);
+    }
+
+    setIsLoading(false);
+  }
+
+  const fetchLockedNFTs = async () => {
+    setIsLoading(true);
+    const lockednfts = await getLockedNFTs();
+    const nftIsInLocked = lockednfts.some((nft) => 
+      nft.title === state.title);
+
+    if (nftIsInLocked) {
+      setNFTIsLocked(true);
+    }
+  
+    setIsLoading(false);
+  }
+
+  const fetchOwnershipPercent = async () => {
+    setIsLoading(true);
+    const totalTokens = 10000;
+    let balance = [];
+    for (let i = 0; i < funders.length; i++) {
+      let tokens = await owners(funders[i]);
+      if (tokens = totalTokens) {
+        balance.push(tokens);
+        break;
+      }
+    }
+    setBalance(balance);
+    setIsLoading(false);
+  }
+
   useEffect(() => {
     if(contract) fetchDonators();
   }, [contract, address])
+
+  useEffect(() => {
+    if(nftMovieContract) {
+      fetchNFTs();
+    }
+  }, [nftMovieContract, address])
+
+  useEffect(() => {
+    if(FractionalizeNFTContract) fetchLockedNFTs();
+  }, [FractionalizeNFTContract, address])
+  
+  useEffect(() => {
+    if(nftMovieTokenContract) fetchOwnershipPercent(); 
+  }, [nftMovieTokenContract, address])
+
+  
 
   return (
     <div>
@@ -186,34 +252,47 @@ const ProducerCampaignDetails = () => {
               <CustomButton 
                 btnType="button"
                 title={nftMinted ? "Released" : "Ready to Release" }
-                styles="w-full bg-[#1dc071]"
+                styles={nftMinted ? "w-full bg-[#9fb4aa]" : "w-full bg-[#1dc071]"}
                 handleClick={handleMint} // Call cascade / series of tx to mint, approve, lock NFT ERC721
               />
-            
           </div>
 
           <div className="my-[10px] w-full flex items-center p-4 bg-[#8c6dfd] h-[130px] rounded-[10px]">
             <img src={money} alt="money" className="w-[40px] h-[40px] object-contain"/>
-            {nftMinted ? (
-              <div>
-                 <h4 className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4">NFT of the movie "{state.title}" is minted!</h4>
-                 <p className="font-epilogue font-normal leading-[22px] text-white p-4">It is time to distibute the fractions.</p>
-              </div>
-            ) : (
               <div>
                 <h4 className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4">First release the movie as NFT</h4>
                  <p className="font-epilogue font-normal leading-[22px] text-white p-4">Then share the fractions of NFT with funders according to their investments!</p>
               </div>            
-            )}
           </div>
 
           <div>
               <CustomButton 
                 btnType="button"
-                title="Share the Ownership"
-                styles="w-full bg-[#1dc071]"
+                title={nftIsLocked ? "Ownership is distributed" : "Share the Ownership"}
+                styles={nftIsLocked ? "w-full bg-[#9fb4aa]" : "w-full bg-[#1dc071]"}
                 handleClick={handleShareOwnership} // Call cascade / series of tx to mint, deposit, distribute ERC20 tokens
               />
+          </div>
+
+          <div>
+            {nftIsLocked ? (
+              <>
+              <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Owners</h4>
+
+              <div className="mt-[20px] flex flex-col gap-4">
+                {donators.length > 0 ? donators.map((item, index) => (
+                  <div key={`${item.donator}-${index}`} className="flex justify-between items-center gap-4">
+                    <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll">{index + 1}. {item.donator}</p>   
+                    <p className="font-epilogue font-semibold text-[16px] text-[#1dc071] leading-[26px] break-ll">{((item.donations * 100) / state.target).toFixed(2)} %</p>           
+                  </div>
+                )) : (
+                  null
+                )}
+              </div>
+              </>
+            ) : (
+              null
+            )}
           </div>
         
          </div> 

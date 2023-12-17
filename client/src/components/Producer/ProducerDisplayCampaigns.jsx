@@ -8,7 +8,7 @@ const ProducerDisplayCampaigns = ({ title, isLoading, campaigns }) => {
   const navigate = useNavigate();
 
   const handleNavigate = (campaign) => {
-    navigate(`/producer-campaign-details/${campaign.title}`, { state: campaign })
+    navigate(`producer-campaign-details/${campaign.title}`, { state: campaign })
   }
 
   
