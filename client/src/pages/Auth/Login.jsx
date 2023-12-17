@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { CustomButton, FormField, Dropdown } from '../../components/Producer'
 
 const Login = () => {
+  const navigate = useNavigate();
+  const userRef = useRef();
+  const errRef = useRef();
+
   const [user, setUser] = useState('');
   const [pwd, setPwd] = useState('');
   const [errMsg, setErrMsg] = useState('');
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     setErrMsg('');
@@ -16,7 +18,20 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    navigate('/');
+    if (user === "producer@example.com") {
+      console.log("user1");
+      navigate('/producer');
+    } else if (user === "broadcaster@example.com") {
+      navigate('/broadcaster');
+    } else if (user === "enduser@example.com") {
+      navigate('/enduser');
+    } else if (user === "distributor@example.com") {
+      navigate('/distributor');
+    } else if (user === "admin@example.com") {
+      navigate('/admin');
+    } else {
+      alert("Unauthorized user. Sign up first!");
+    }
   }
 
   return (
@@ -27,21 +42,17 @@ const Login = () => {
           <FormField 
             placeholder="Email"
             inputType="text"
-            /* value={user}
+            value={user}
             ref={userRef}
             autoComplete="off"
             handleChange={(e) => setUser(e.target.value)}
-            required
-            aria-invalid={validName ? "false" : "true"} */
           />
 
           <FormField 
             placeholder="Password"
             inputType="password"
-            /* value={pwd}
+            value={pwd}
             handleChange={(e) => setPwd(e.target.value)}
-            required
-            aria-invalid={validPwd ? "false" : "true"} */
           />
 
           <div className="flex justify-center items-center">
