@@ -19,6 +19,9 @@ contract FractionalizeNFT is IERC721Receiver {
 
   struct LockedNFTMovie {
     uint256 tokenId;
+    string title;
+    string description;
+    string movieURI;
     address producer;
     bool isLocked;
     address[] buyers;
@@ -93,7 +96,7 @@ contract FractionalizeNFT is IERC721Receiver {
   ////////////////////////////////// ERC721  ///////////////////////////
 
   // send (lock) erc721 nft from NFTMovie to this SC 
-  function lockNFTMovie(uint256 _tokenId) external onlyProducer {
+  function lockNFTMovie(uint256 _tokenId, string memory _title, string memory _description, string memory _movieURI) external onlyProducer returns (uint256) {
     require(nftMovie.ownerOf(_tokenId) == msg.sender, "You don't own this NFT!");
 
     nftMovie.safeTransferFrom(
@@ -105,10 +108,15 @@ contract FractionalizeNFT is IERC721Receiver {
     //update mapping
     LockedNFTMovie storage idToNFT = idToNFTs[_lockedNFTIdCounter];
     idToNFT.tokenId = _tokenId;
+    idToNFT.title = _title;
+    idToNFT.description = _description;
+    idToNFT.movieURI = _movieURI;
     idToNFT.producer = msg.sender;
     idToNFT.isLocked = true;
 
     _lockedNFTIdCounter++;
+
+    return _lockedNFTIdCounter - 1;
   }
 
   ///////////////////////////////////// read functions //////////////////////
@@ -128,7 +136,6 @@ contract FractionalizeNFT is IERC721Receiver {
 
     return allLockedNFTs;
   }
-
 
   //required function for ERC721
   function onERC721Received(

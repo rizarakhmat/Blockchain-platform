@@ -49,7 +49,7 @@ contract NFTMovie is ERC721Base {
     }
 
     // function mint NFTMovie and store info about it
-    function createNFTMovie(string memory _title, string memory _description,string memory _movieURI) public onlyProducer returns (uint256) {
+    function createNFTMovie(string memory _title, string memory _description, string memory _movieURI) public onlyProducer returns (uint256) {
         //create NFTMovie
         _create(_movieURI);
 
