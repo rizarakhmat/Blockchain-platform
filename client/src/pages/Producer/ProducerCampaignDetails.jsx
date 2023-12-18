@@ -283,7 +283,7 @@ const ProducerCampaignDetails = () => {
                 {donators.length > 0 ? donators.map((item, index) => (
                   <div key={`${item.donator}-${index}`} className="flex justify-between items-center gap-4">
                     <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll">{index + 1}. {item.donator}</p>   
-                    <p className="font-epilogue font-semibold text-[16px] text-[#1dc071] leading-[26px] break-ll">{((item.donations * 100) / state.target).toFixed(2)} %</p>           
+                    <p className="font-epilogue font-semibold text-[16px] text-[#1dc071] leading-[26px] break-ll">{((item.donations * 100) / state.target).toFixed(2)} %</p>
                   </div>
                 )) : (
                   null

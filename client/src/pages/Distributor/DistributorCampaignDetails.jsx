@@ -57,19 +57,19 @@ const DistributorCampaignDetails = () => {
 
       <div className="mt-[60px] flex lg:flex-row flex-col gap-5">
         <div className="flex-[2] flex flex-col gap-[40px]">
-          <div>
+          {/* <div>
             {donators ? (
               <>
                 <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Streaming right possession</h4>
 
                 <div className="mt-[20px]">
-                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You have the right to stream {/* "{state.title}" */} movie.</p>
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You have the right to stream "{state.title}" movie.</p>
                 </div>
               </>
             ) : (
               <></>
             )}
-          </div>
+          </div> */}
 
           <div>
             <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Producer</h4>
@@ -83,7 +83,7 @@ const DistributorCampaignDetails = () => {
             <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Story</h4>
 
             <div className="mt-[20px]">
-              <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{/* {state.description} */}DESCRIPTION</p>
+              <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{state.description}</p>
             </div>
           </div>
 

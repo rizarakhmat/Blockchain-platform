@@ -1,13 +1,35 @@
 import React from 'react'
 import { Route, Routes } from 'react-router-dom';
 
-import { NavbarProducer, SidebarProducer, BroadcasterNavbar, BroadcasterSidebar, DistributorSidebar, EndUserSidebar } from './components';
-import { Login, Signup, Payment, Home, Profile, CampaignDetails, CreateCampaign, BroadcasterProfile, ProducerCampaignDetails, BroadcasterCampaignDetails, DistributorCampaignDetails, DistributorProfile, EnduserProfile, EnduserCampaignDetails } from './pages';
+import { NavbarProducer, SidebarProducer, BroadcasterNavbar, BroadcasterSidebar, DistributorSidebar, EndUserSidebar, Sidebar } from './components';
+import { Login, Signup, Payment, Home, Profile, CampaignDetails, CreateCampaign, BroadcasterProfile, BroadcasterCampaignDetails, BroadcasterAllCampaignsDetails, ProducerCampaignDetails, DistributorCampaignDetails, DistributorProfile, DistributorAllCampaignsDetails, EnduserProfile, EnduserCampaignDetails, EUAllCampaignsDetails } from './pages';
 const App = () => {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* Unprotected Routes without Navbar and Sidebar */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/payment" element={<Payment />} />
+
+        <Route path="*" element={
+          <div className='relative sm:-8 p-4 bg-[#f9fcff] min-h-screen flex flex-row'>
+            <div className='sm:flex hidden mr-10 relative'>
+              <Sidebar />
+            </div>
+
+            <div className='flex-1 max-sm:w-full max-w-[1280px] mx-auto sm:pr-5'>
+            <BroadcasterNavbar />
+            <Routes>
+              <Route path="/" element={<Home />}/>
+              <Route path="/campaign-details/:id" element={<CampaignDetails />}/>
+            </Routes>
+          </div>
+          </div>
+        }>
+        </Route>
+
+        {/* Protected Routes for role with Navbar and Sidebar */}
         <Route path="/producer/*" element={
           <div className='relative sm:-8 p-4 bg-[#f9fcff] min-h-screen flex flex-row'>
             <div className='sm:flex hidden mr-10 relative'>
@@ -39,7 +61,7 @@ const App = () => {
             <Routes>
               <Route path="" element={<Home />}/>
               <Route path="broadcaster-profile" element={<BroadcasterProfile />}/>
-              <Route path="campaign-details/:id" element={<CampaignDetails />}/>
+              <Route path="campaign-details/:id" element={<BroadcasterAllCampaignsDetails />}/>
               <Route path="broadcaster-profile/broadcaster-campaign-details/:id" element={<BroadcasterCampaignDetails />}/>
             </Routes>
           </div>
@@ -58,7 +80,7 @@ const App = () => {
             <Routes>
               <Route path="" element={<Home />}/>
               <Route path="enduser-profile" element={<EnduserProfile />}/>
-              <Route path="campaign-details/:id" element={<CampaignDetails />}/>
+              <Route path="campaign-details/:id" element={<EUAllCampaignsDetails />}/>
               <Route path="enduser-profile/broadcaster-campaign-details/:id" element={<EnduserCampaignDetails />}/>
             </Routes>
           </div>
@@ -77,18 +99,13 @@ const App = () => {
             <Routes>
               <Route path="" element={<Home />}/>
               <Route path="distributor-profile" element={<DistributorProfile />}/>
-              <Route path="campaign-details/:id" element={<CampaignDetails />}/>
+              <Route path="campaign-details/:id" element={<DistributorAllCampaignsDetails />}/>
               <Route path="distributor-profile/distributor-campaign-details/:id" element={<DistributorCampaignDetails />}/>
             </Routes>
           </div>
           </div>
         }>
         </Route>
-
-        {/* Route for Signup without Navbar and Sidebar */}
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/payment" element={<Payment />} />
       </Routes>
     </div>
   )

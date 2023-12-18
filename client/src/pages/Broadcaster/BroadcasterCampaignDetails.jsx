@@ -37,7 +37,7 @@ const BroadcasterCampaignDetails = () => {
   const fetchDonators = async () => {
     setIsLoading(true);
     const data = await getDonations(state.pId);
-
+    
     setDonators(data);
     setIsLoading(false);
   }
@@ -116,17 +116,19 @@ const BroadcasterCampaignDetails = () => {
       <div className="mt-[60px] flex lg:flex-row flex-col gap-5">
         <div className="flex-[2] flex flex-col gap-[40px]">
           <div>
-            {numberOfTokens > 0 ? (
-              <>
-                <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Ownership</h4>
-
-                <div className="mt-[20px]">
-                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You are the owner of {(numberOfTokens * 100) / 10000} % of the "{state.title}" NFT. Now you can set up the Distribution Agreement.</p>
-                </div>
-              </>
-            ) : (
+            {donators.map((item, index) => (
+              item.donator === "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73" ? (
+                <>
+                    <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Ownership</h4>
+    
+                    <div className="mt-[20px]">
+                      <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You are the owner of {((item.donations * 100) / state.target).toFixed(2)} % of the "{state.title}" NFT. Now you can set up the Distribution Agreement.</p>
+                    </div>
+                  </>
+              ) : (
               null
-            )}
+              )
+            ))}
           </div>
 
           <div>

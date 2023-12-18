@@ -104,3 +104,22 @@ export const distributorNavbar = [
     disabled: true,
   },
 ];
+
+export const Navbar = [
+  {
+    name: 'dashboard',
+    imgUrl: dashboard,
+    link: '',
+  },
+  {
+    name: 'payment',
+    imgUrl: payment,
+    link: '',
+    disabled: true,
+  },
+  {
+    name: 'profile',
+    imgUrl: profile,
+    link: '/login',
+  },
+];
