@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom'
 import { loader } from '../../assets'
 import { FundCard } from '..'
 
-const BroadcasterDisplayCampaigns = ({ title, isLoading, campaigns }) => {
+const BroadcasterDisplayCampaigns = ({ title, isLoading, campaigns, nftIsMinted }) => {
   const navigate = useNavigate();
 
   const handleNavigate = (campaign) => {
-    navigate(`broadcaster-campaign-details/${campaign.title}`, { state: campaign })
+    navigate(`broadcaster-campaign-details/${campaign.title}`, { state:
+      campaign
+    })
   }
 
   

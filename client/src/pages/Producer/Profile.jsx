@@ -12,6 +12,7 @@ const { address, contract, getUserCampaigns } = useStateContext();
 const fetchCampaigns = async () => {
   setIsLoading(true);
   const data = await getUserCampaigns();
+  console.log(data);
   setCampaigns(data);
   setIsLoading(false);
 }

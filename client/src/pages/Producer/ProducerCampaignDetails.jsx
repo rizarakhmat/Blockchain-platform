@@ -43,7 +43,6 @@ const ProducerCampaignDetails = () => {
     const mintedNFTid = await tokenID();  
     
     await approveSC(mintedNFTid);
-    
     await lockNFT(mintedNFTid, state.title, state.description, form.uri);
 
     setNFTMinted(true);
@@ -63,14 +62,17 @@ const ProducerCampaignDetails = () => {
     if (nftIsLocked) return;
 
     setIsLoading(true);
-    await mintERC20Tokens(10000); // hardcoded
+    const mintedNFTid = await tokenID(); 
+    const amount = 10000;
+    await mintERC20Tokens(amount, mintedNFTid); // hardcoded
 
-    await approveTokenSC(10000); // hardcoded
+    await approveTokenSC(amount); // hardcoded
 
-    await depositTokens(10000); // hardcoded
+    await depositTokens(amount); // hardcoded
 
     await distributeTokens(
-      10000,
+      amount,
+      mintedNFTid,
       funders,
       donations.map(donation => {
         const floatValue = parseFloat(donation);
@@ -253,7 +255,7 @@ const ProducerCampaignDetails = () => {
                 btnType="button"
                 title={nftMinted ? "Released" : "Ready to Release" }
                 styles={nftMinted ? "w-full bg-[#9fb4aa]" : "w-full bg-[#1dc071]"}
-                handleClick={handleMint} // Call cascade / series of tx to mint, approve, lock NFT ERC721
+                handleClick={nftMinted ? null : handleMint} // Call cascade / series of tx to mint, approve, lock NFT ERC721
               />
           </div>
 
@@ -270,7 +272,7 @@ const ProducerCampaignDetails = () => {
                 btnType="button"
                 title={nftIsLocked ? "Ownership is distributed" : "Share the Ownership"}
                 styles={nftIsLocked ? "w-full bg-[#9fb4aa]" : "w-full bg-[#1dc071]"}
-                handleClick={handleShareOwnership} // Call cascade / series of tx to mint, deposit, distribute ERC20 tokens
+                handleClick={nftIsLocked ? null : handleShareOwnership} // Call cascade / series of tx to mint, deposit, distribute ERC20 tokens
               />
           </div>
 

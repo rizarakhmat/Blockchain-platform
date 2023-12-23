@@ -11,14 +11,17 @@ import { profile, money } from '../../assets'
 const BroadcasterCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { erc20tokens, getDonations, contract, nftMovieTokenContract, address } = useStateContext();
+  const { getSharesOf, getId, getTimeWindow, getCountryList, setDistributionAggrem, getDonations, contract, royaltiesRemunerationContract, FractionalizeNFTContract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
-  const [numberOfTokens, setNumberOfTokens] = useState();
 
   const [countries, setCountries] = useState([{ id: 0, value: '' }]);
   const [count, setCount] = useState(1);
+  const [isOwnerOfShare, setIsOwnerOfShare] = useState(false);
+
+  const [timeWindow, setTimeWindow] = useState([]);
+  const [countryList, setCountryList] = useState([]);
 
   const [form, setForm] = useState({
     name: '',
@@ -31,7 +34,66 @@ const BroadcasterCampaignDetails = () => {
   // function to update form
   const handleFormFieldChange = (fieldName, e) => {
    setForm({ ...form, [fieldName]: e.target.value })
-   console.log(form)
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setIsLoading(true);
+    await setDistributionAggrem(state.title, { ...form, startDate: Math.floor(new Date(form.startDate).getTime() / 1000), deadline: Math.floor(new Date(form.deadline).getTime() / 1000)} );
+
+    setIsLoading(false);
+    navigate('/broadcaster/');
+  }
+
+  // internal function to transfrom from timestamp to Date format
+  function formatDate(inputDate) {
+    const date = new Date(inputDate);
+  
+    if (isNaN(date)) {
+      return "Invalid Date";
+    }
+  
+    const month = date.getMonth() + 1; // Adding 1 because months are zero-indexed
+    const day = date.getDate();
+    const year = date.getFullYear();
+  
+    // Pad the month and day with leading zeros if needed
+    const formattedMonth = (month < 10) ? `0${month}` : month;
+    const formattedDay = (day < 10) ? `0${day}` : day;
+  
+    return `${formattedMonth}/${formattedDay}/${year}`;
+  }
+
+  const fetchTimeCountry = async () => {
+    setIsLoading(true);
+    const curentId = await getId();
+    
+    // fetch Time window and convert using formatDate()
+    const times = await getTimeWindow(curentId);
+
+    const reversedTime = times.map(time => {
+      return {
+        startDate: formatDate(new Date(time.startDate * 1000)),
+        deadline: formatDate(new Date(time.deadline * 1000))
+      };
+    });
+    setTimeWindow(reversedTime);
+
+    //fetch Counrty List
+    const countries = await getCountryList(curentId);
+    setCountryList(countries);
+    
+    setIsLoading(false);
+  }
+  // function to check if the address is owner of token that represent This movie NFT
+  const fetchShares = async () => {
+    setIsLoading(true);
+    const ownedShares = await getSharesOf(address, state.pId);
+    if (ownedShares.length > 0) {
+      setIsOwnerOfShare(true);
+    }
+    setIsLoading(false);
   }
 
   const fetchDonators = async () => {
@@ -42,22 +104,19 @@ const BroadcasterCampaignDetails = () => {
     setIsLoading(false);
   }
 
-  const fetchNumberOfTokens = async () => {
-    setIsLoading(true);
-    let tokens = await erc20tokens();
-    setNumberOfTokens(tokens);
-    setIsLoading(false);
-  }
-
   useEffect(() => {
     if(contract) fetchDonators();
   }, [contract, address])
-
+  
   useEffect(() => {
-    if(nftMovieTokenContract) fetchNumberOfTokens(); 
-  }, [nftMovieTokenContract, address])
+    if(FractionalizeNFTContract) fetchShares(); 
+  }, [FractionalizeNFTContract, address])
+  
+  useEffect(() => {
+    if(royaltiesRemunerationContract) fetchTimeCountry(); 
+  }, [royaltiesRemunerationContract, address])
 
-  // Functions to update country list
+  // internal functions to update country list
   const handleAddCountry = () => {
     setCountries([...countries, { id: count, value: '' }]);
     setCount(count + 1);
@@ -73,11 +132,9 @@ const BroadcasterCampaignDetails = () => {
       ...prevForm,
       countries: updatedCountries.map((country) => country.value),
     }))
-
-    console.log(form);
-
   };
 
+  // internal function to calculate Sum of all donationions of this address
   const calculateSum = (owner) => {
     let sum = 0;
 
@@ -117,7 +174,7 @@ const BroadcasterCampaignDetails = () => {
         <div className="flex-[2] flex flex-col gap-[40px]">
           <div>
             {donators.map((item, index) => (
-              item.donator === "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73" ? (
+              isOwnerOfShare ? (
                 <>
                     <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Ownership</h4>
     
@@ -134,7 +191,7 @@ const BroadcasterCampaignDetails = () => {
           <div>
             <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Producer</h4>
 
-            <div className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px]">
+            <div className="flex flex-row items-center flex-wrap gap-[14px]">
               <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full bg-[#f9fcff] cursor-pointer">
                 <img src={profile} alt="user" className="w-[60%] h-[60%] object-contain"/>
               </div>
@@ -167,26 +224,18 @@ const BroadcasterCampaignDetails = () => {
           </div>
 
           <>
-            {numberOfTokens > 0 ? ( 
+            {isOwnerOfShare ? ( 
                 <div>
                   <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Distribution Agreement</h4>
+                  <form onSubmit={handleSubmit}>
                   <div>
                     <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Distributor Info</h4>
     
                     <div> 
                       <div className="mt-[20px] flex flex-col gap-4">
                         <FormField 
-                          labelName="Distributor Name *"
-                          placeholder="Name of Distributor company"
-                          inputType="text"
-                          value={form.name}
-                          handleChange={(e) => handleFormFieldChange('name', e)}
-                        />
-                      </div>
-                      <div className="mt-[20px] flex flex-col gap-4">
-                        <FormField 
-                          labelName="Price paid by Distributor *"
-                          placeholder="ETH 0.01"
+                          labelName="Amount that the Distributor must pay to obtain the streaming right *"
+                          placeholder="ETH 10"
                           inputType="text"
                           value={form.price}
                           handleChange={(e) => handleFormFieldChange('price', e)}
@@ -246,24 +295,49 @@ const BroadcasterCampaignDetails = () => {
     
                   <div className="mt-[20px]">
                     <CustomButton 
-                      btnType="button"
-                      title="Set Distribution aggrement"
-                      styles="w-full bg-[#1dc071]"
-                      //handleClick={} // Call SM NFT
+                      btnType={countryList && timeWindow ? "button" : "submit"}
+                      title={countryList && timeWindow ? "Distribution agreement is already settled" : "Set Distribution agreement"}
+                      styles={countryList && timeWindow ? "w-full bg-[#9fb4aa]" : "w-full bg-[#1dc071]"}
                     />
                   </div>
+                </form>
               </div>
             ) : (
               <>
-                <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Distribution Agreement</h4>
-
-                <div className="mt-[20px]">
-                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You could be able to set up the Distribution Agreement after you will become the owner of the NFT fraction.</p>
-                </div>
+                <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase">Distribution Agreement</h4>
+                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You could be able to settle up the Distribution Agreement after you will become the owner of the NFT fraction.</p>
               </>
             )}
           </>
 
+          <>
+          {isOwnerOfShare && countryList && timeWindow ? (
+            <>
+              <div>
+                <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Streaming right</h4>
+                <div className='flex flex-col gap-[20px]'>
+                  <div>
+                    <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Time Window</h4>
+                    {timeWindow.map((item, index) => (
+                      <div>
+                        <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[20px]">Start Date: {item.startDate}</p>
+                        <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[10px]">End Date: {item.deadline}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Country list</h4>
+                    {countryList.map((item, index) => (
+                      <div className='mt-[10px]'>
+                        <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll">{item}</p>
+                    </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : null}
+          </>
         </div>  
         
       </div>

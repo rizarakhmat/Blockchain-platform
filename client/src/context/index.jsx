@@ -1,5 +1,5 @@
 import React, { useContext, createContext } from 'react';
-import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS, NFTMOVIETOKEN_ADDRESS, FRACTIONALIZENFT_ADDRESS } from '../constants/addresses'
+import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS, NFTMOVIETOKEN_ADDRESS, FRACTIONALIZENFT_ADDRESS, ROYALTIESREMUNERATION_ADDRESS } from '../constants/addresses'
 import { useAddress, useContract, useMetamask, useContractWrite, useContractRead } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 
@@ -11,6 +11,7 @@ export const StateContextProvider = ({ children }) => {
   const { contract: nftMovieContract } = useContract(NFTMOVIE_ADDRESS);
   const { contract: nftMovieTokenContract } = useContract(NFTMOVIETOKEN_ADDRESS);
   const { contract: FractionalizeNFTContract } = useContract(FRACTIONALIZENFT_ADDRESS);
+  const { contract: royaltiesRemunerationContract } = useContract(ROYALTIESREMUNERATION_ADDRESS);
 
 
   // call CrowdFunding SC
@@ -28,6 +29,9 @@ export const StateContextProvider = ({ children }) => {
   const { mutateAsync: lockNFTMovie } = useContractWrite(FractionalizeNFTContract, 'lockNFTMovie');
   const { mutateAsync:  depositERC20 } = useContractWrite(FractionalizeNFTContract, 'depositERC20');
   const { mutateAsync:  distributeERC20Tokens } = useContractWrite(FractionalizeNFTContract, 'distributeERC20Tokens');
+
+  // call RoyaltiesRemuneration SC
+  const { mutateAsync: setDistributionAggrement } = useContractWrite(royaltiesRemunerationContract, "setDistributionAggrement");
 
 
   const address = useAddress();
@@ -97,15 +101,7 @@ export const StateContextProvider = ({ children }) => {
 
   //////////////////////////////// NFTMovieToken ERC20 SC functions
 
-  const erc20tokens = async () => {
-    const data = await nftMovieTokenContract.call(
-      'balanceOf', 
-      [address]
-    );
-
-    return data.toNumber();
-  }
-
+  // use in Producer with address
   const owners = async (address) => {
     const data = await nftMovieTokenContract.call(
       'balanceOf', 
@@ -115,11 +111,13 @@ export const StateContextProvider = ({ children }) => {
     return data.toNumber();
   }
 
-  const mintERC20Tokens = async (amount) => {
+  // pass tokenID that erc20 token Represent
+  const mintERC20Tokens = async (amount, _tokenId) => {
     try {
       const data = await mintTokens({
         args: [
-          amount
+          amount,
+          _tokenId
         ],
         overrides: {
           gasLimit: 1000000,
@@ -166,7 +164,6 @@ export const StateContextProvider = ({ children }) => {
           gasPrice: 0,
         },
       });
-
       console.info("FractionalizeNFT contract lockNFTMovie() call successs", data);
     } catch (err) {
       console.error("FractionalizeNFT contract lockNFTMovie() failure", err);
@@ -190,11 +187,12 @@ export const StateContextProvider = ({ children }) => {
     }
   }
 
-  const distributeTokens = async (amount, buyers, donations) => {
+  const distributeTokens = async (amount, _tokenId, buyers, donations) => {
     try {
       const data = await distributeERC20Tokens({
         args: [
           amount,
+          _tokenId,
           buyers,
           donations
         ],
@@ -227,6 +225,25 @@ export const StateContextProvider = ({ children }) => {
     }));
 
     return parseLockedNFTs;
+  }
+  
+  const getSharesOf = async (owner, tokenId) => {
+    const ownedShare = await FractionalizeNFTContract.call("shareOf", [owner, tokenId]);
+    const numberOfShares = ownedShare.length;
+
+    const parsedOwnedShare = [];
+
+    for(let i = 0; i < numberOfShares; i++) {
+      parsedOwnedShare.push(ownedShare.map((i) => i.toString()));
+    }
+  
+    return parsedOwnedShare;
+  }
+
+  const getSharesOfNFT = async (tokenId) => {
+    const shares = await FractionalizeNFTContract.call("getSharesOfNFT", [tokenId]);
+    
+    return shares;
   }
 
 
@@ -329,6 +346,59 @@ export const StateContextProvider = ({ children }) => {
     return userFundedCampaigns;
   }
 
+    //////////////////////////////// RoyaltiesRemuneration SC functions
+  const setDistributionAggrem = async (_title, form) => {
+    try {
+      const data = await setDistributionAggrement({ args: [
+        _title,
+        form.price,
+        form.startDate,
+        form.deadline,
+        form.countries
+      ],
+      overrides: {
+        gasLimit: 1000000,
+        gasPrice: 0,
+      },
+    });
+      console.info("RoyaltiesRemuneration contract setDistributionAggrement() call successs", data);
+    } catch (err) {
+      console.error("RoyaltiesRemuneration contract setDistributionAggrement() call failure", err);
+    }
+  }
+
+  const getId = async () => {
+    const numberOfCampaigns = await royaltiesRemunerationContract.call('numberOfCampaigns');
+
+    return numberOfCampaigns.toString() - 1;
+  }
+
+  const getTimeWindow = async (_id) => {
+    const result = await royaltiesRemunerationContract.call('getTimeWindow', [_id]);
+    const parsedTime = [];
+
+    parsedTime.push({
+      startDate: result[0].toString(),
+      deadline: result[1].toString(),
+    });
+
+    return parsedTime;
+  }
+  
+  const getCountryList = async (_id) => {
+    const result = await royaltiesRemunerationContract.call('getCountryList', [_id]);
+
+    return result;
+  }
+  
+  const getDAs = async () => {
+    const allDAs = await royaltiesRemunerationContract.call('getDistributionAggrements');
+
+    return allDAs;
+  }
+  
+  
+
   return (
     <StateContext.Provider
       value={{
@@ -337,6 +407,7 @@ export const StateContextProvider = ({ children }) => {
         nftMovieContract,
         nftMovieTokenContract,
         FractionalizeNFTContract,
+        royaltiesRemunerationContract,
         //CrowdFunding
         connect,
         createCampaign: publishCampaign,
@@ -353,13 +424,20 @@ export const StateContextProvider = ({ children }) => {
         //ERC20 NFTMovieToken
         mintERC20Tokens,
         approveTokenSC,
-        erc20tokens,
         owners,
         //FractionalizeNFT
         lockNFT,
         depositTokens,
         distributeTokens,
-        getLockedNFTs
+        getLockedNFTs,
+        getSharesOf,
+        getSharesOfNFT,
+        // RoyaltiesRemuneration
+        setDistributionAggrem,
+        getId,
+        getTimeWindow,
+        getCountryList,
+        getDAs
       }  
       }
     >
