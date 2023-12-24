@@ -4,13 +4,13 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useStateContext } from '../../context'
 import { CustomButton, FormField } from '../../components/Producer'
 import { Loader, CountBox } from '../../components'
-import { calculateTimeLeft } from '../../utils'
+import { calculateTimeLeft, daysLeft, formatDate } from '../../utils'
 import { profile, money } from '../../assets'
 
 const DistributorCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { getDAs, getId, getTimeWindow, getCountryList, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
+  const { buyStreamingRight, getDAs, getId, getTimeWindow, getCountryList, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
@@ -19,10 +19,21 @@ const DistributorCampaignDetails = () => {
   const [timeWindow, setTimeWindow] = useState([]);
   const [countryList, setCountryList] = useState([]);
   const [price, setPrice] = useState();
+  const [isSteamingRightOwner, setIsSteamingRightOwner] = useState();
 
   // function to update form
   const handleFormFieldChange = (fieldName, e) => {
    setForm({ ...form, [fieldName]: e.target.value })
+  }
+
+  // function to pay price to get streaming rights
+  const buyRight = async () => {
+    setIsLoading(true);
+    const curentId = await getId();
+
+    await buyStreamingRight(curentId);
+    navigate('/distributor/');
+    setIsLoading(false);
   }
 
   const fetchDonators = async () => {
@@ -31,25 +42,6 @@ const DistributorCampaignDetails = () => {
 
     setDonators(data);
     setIsLoading(false);
-  }
-
-  // internal function to transfrom from timestamp to Date format
-  function formatDate(inputDate) {
-    const date = new Date(inputDate);
-  
-    if (isNaN(date)) {
-      return "Invalid Date";
-    }
-  
-    const month = date.getMonth() + 1; // Adding 1 because months are zero-indexed
-    const day = date.getDate();
-    const year = date.getFullYear();
-  
-    // Pad the month and day with leading zeros if needed
-    const formattedMonth = (month < 10) ? `0${month}` : month;
-    const formattedDay = (day < 10) ? `0${day}` : day;
-  
-    return `${formattedMonth}/${formattedDay}/${year}`;
   }
 
   const fetchTimeCountry = async () => {
@@ -74,12 +66,15 @@ const DistributorCampaignDetails = () => {
     setIsLoading(false);
   }
 
-  const getPrice = async () => {
+  const getDAInfo = async () => {
     setIsLoading(true);
     const allDAs = await getDAs();
     const curentId = await getId();
     const price = allDAs[curentId].price.toString();
     setPrice(price);
+
+    const isPricePaid = allDAs[curentId].isPricePaid;
+    setIsSteamingRightOwner(isPricePaid);
 
     setIsLoading(false);
   }
@@ -107,7 +102,7 @@ const DistributorCampaignDetails = () => {
   useEffect(() => {
     if(royaltiesRemunerationContract) 
     fetchTimeCountry();
-    getPrice();
+    getDAInfo();
   }, [royaltiesRemunerationContract, address])
 
   return (
@@ -118,7 +113,7 @@ const DistributorCampaignDetails = () => {
         <div className="flex-1 flex-col">
           <img src={state.image} alt="campaign" className="w-full h-[410px] object-cover rounded-xl"/>
           <div className="relative w-full h-[5px] bg-[#3a3a43] mt-2">
-            <div className="absolute h-full bg-[#4acd8d]" style={{ /* width: `${calculateTimeLeft(startDate, deadline)}%`, */ maxWidth: '100%'}}> {/* pass here the startDate, deadline info from broadcaster */}
+            <div className="absolute h-full bg-[#4acd8d]" style={{ width: `${calculateTimeLeft(timeWindow.map(i => i.startDate), timeWindow.map(i => i.deadline))}%`, maxWidth: '100%'}}> 
             </div>
           </div>
         </div>
@@ -126,31 +121,23 @@ const DistributorCampaignDetails = () => {
         <div className="flex md:w-[150px] w-full flex-wrap justify-between md:mt-[50px]">
           <CountBox title="You payed" value={calculateSum(address)} />
           <CountBox title="#Funders" value={donators.length} />
-          <CountBox title={`Time left`} value={state.amountCollected} />
+          <CountBox title="Days left" value={daysLeft(timeWindow.map(i => i.deadline))} />
         </div>
       </div> 
 
       <div className="mt-[60px] flex lg:flex-row flex-col gap-5">
         <div className="flex-[2] flex flex-col gap-[40px]">
-          {/* <div>
-            {donators ? (
-              <>
-                <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Streaming right possession</h4>
-
-                <div className="mt-[20px]">
-                  <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You have the right to stream "{state.title}" movie.</p>
-                </div>
-              </>
-            ) : (
-              <></>
-            )}
-          </div> */}
-
           <div>
             <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Producer</h4>
 
-            <div className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px]">
-              <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] break-all">{state.owner}</h4>
+            <div className="flex flex-row items-center flex-wrap gap-[14px]">
+              <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full bg-[#f9fcff] cursor-pointer">
+                <img src={profile} alt="user" className="w-[60%] h-[60%] object-contain"/>
+              </div>
+              <div>
+                <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] break-all">{state.owner}</h4>
+                <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]"># Campaigns</p>
+              </div>
             </div>
           </div>
 
@@ -198,29 +185,16 @@ const DistributorCampaignDetails = () => {
                     </div>
                     ))}
                   </div>
-                </div>
-                <div className="mt-[20px] flex-1 flex-col p-4 bg-[#e6e8eb] rounded-[10px]">
-                    <p className="font-epilogue fount-medium text-[20px] leading-[30px] text-center text-[#808191]">
-                      Price requested to redeem the streaming right
-                    </p>
-                    {price ? (
-                      <p className="font-epilogue font-bold sm:text-[25px] text-[18px] leading-[38px] text-center text-[#1dc071] mt-[10px]">{price} ETH</p>) : (
-                        <p className="font-epilogue font-bold sm:text-[25px] text-[18px] leading-[38px] text-center text-[#1dc071] mt-[10px]">?</p>
-                      )}
-                    <div className="w-full mt-[10px]">
-                      <CustomButton 
-                        btnType="button"
-                        title="Buy"
-                        styles="w-full bg-[#8c6dfd]"
-                        //handleClick={}
-                      />
-                    </div>
+                  <div>
+                    <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase mt-[20px]">Price requested to redeem the streaming right</h4>
+                    <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[10px]">{price}</p>
                   </div>
+                </div>
                 </div>
             </>
           ) : null}
     
-            <form /* onSubmit={}  */ className='flex-1 mt-[20px]'>
+            <form /* onSubmit={}  */ className='flex-1'>
               <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Royalties remuneration</h4>
                 <div className="mt-[20px]">
                   <FormField 

@@ -114,8 +114,8 @@ const BroadcasterAllCampaignsDetails = () => {
               <CustomButton 
                 btnType="button"
                 title="Fund Campaign"
-                styles="w-full bg-[#8c6dfd]"
-                handleClick={handleDonate}
+                styles={state.target >= state.amountCollected ? "w-full bg-[#9fb4aa]" : "w-full bg-[#8c6dfd]"}
+                handleClick={state.target >= state.amountCollected ? () => {} : handleDonate}
               />
             </div>
           </div>

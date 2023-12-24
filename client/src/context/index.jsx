@@ -32,6 +32,7 @@ export const StateContextProvider = ({ children }) => {
 
   // call RoyaltiesRemuneration SC
   const { mutateAsync: setDistributionAggrement } = useContractWrite(royaltiesRemunerationContract, "setDistributionAggrement");
+  const { mutateAsync: buyStreamRight } = useContractWrite(royaltiesRemunerationContract, "buyStreamingRights");
 
 
   const address = useAddress();
@@ -347,6 +348,7 @@ export const StateContextProvider = ({ children }) => {
   }
 
     //////////////////////////////// RoyaltiesRemuneration SC functions
+
   const setDistributionAggrem = async (_title, form) => {
     try {
       const data = await setDistributionAggrement({ args: [
@@ -366,11 +368,31 @@ export const StateContextProvider = ({ children }) => {
       console.error("RoyaltiesRemuneration contract setDistributionAggrement() call failure", err);
     }
   }
+  
+  const buyStreamingRight = async (_id, amount) => {
+    try {
+      const data = await buyStreamRight({ args: 
+        [_id],
+      overrides: {
+        value: ethers.utils.parseEther(amount),
+        gasLimit: 1000000,
+        gasPrice: 0,
+      },
+    });
+      console.info("RoyaltiesRemuneration contract buyStreamingRights() call successs", data);
+    } catch (err) {
+      console.error("RoyaltiesRemuneration contract buyStreamingRights() call failure", err);
+    }
+  }
 
   const getId = async () => {
     const numberOfCampaigns = await royaltiesRemunerationContract.call('numberOfCampaigns');
 
+    if (numberOfCampaigns.toString() == 0) {
+      return 0;
+    } else {
     return numberOfCampaigns.toString() - 1;
+    }
   }
 
   const getTimeWindow = async (_id) => {
@@ -390,7 +412,7 @@ export const StateContextProvider = ({ children }) => {
 
     return result;
   }
-  
+
   const getDAs = async () => {
     const allDAs = await royaltiesRemunerationContract.call('getDistributionAggrements');
 
@@ -434,6 +456,7 @@ export const StateContextProvider = ({ children }) => {
         getSharesOfNFT,
         // RoyaltiesRemuneration
         setDistributionAggrem,
+        buyStreamingRight,
         getId,
         getTimeWindow,
         getCountryList,

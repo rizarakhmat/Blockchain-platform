@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useStateContext } from '../../context'
 import { CustomButton, FormField } from '../../components/Producer'
 import { CountBox, Loader } from '../../components'
-import { calculateBarPercentage } from '../../utils'
+import { calculateBarPercentage, formatDate } from '../../utils'
 import { profile, money } from '../../assets'
 
 
@@ -44,25 +44,6 @@ const BroadcasterCampaignDetails = () => {
 
     setIsLoading(false);
     navigate('/broadcaster/');
-  }
-
-  // internal function to transfrom from timestamp to Date format
-  function formatDate(inputDate) {
-    const date = new Date(inputDate);
-  
-    if (isNaN(date)) {
-      return "Invalid Date";
-    }
-  
-    const month = date.getMonth() + 1; // Adding 1 because months are zero-indexed
-    const day = date.getDate();
-    const year = date.getFullYear();
-  
-    // Pad the month and day with leading zeros if needed
-    const formattedMonth = (month < 10) ? `0${month}` : month;
-    const formattedDay = (day < 10) ? `0${day}` : day;
-  
-    return `${formattedMonth}/${formattedDay}/${year}`;
   }
 
   const fetchTimeCountry = async () => {
@@ -179,7 +160,7 @@ const BroadcasterCampaignDetails = () => {
                     <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Ownership</h4>
     
                     <div className="mt-[20px]">
-                      <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You are the owner of {((item.donations * 100) / state.target).toFixed(2)} % of the "{state.title}" NFT. Now you can set up the Distribution Agreement.</p>
+                      <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You are the owner of {((item.donations * 100) / state.target).toFixed(2)} % of the "{state.title}" NFT.</p>
                     </div>
                   </>
               ) : (

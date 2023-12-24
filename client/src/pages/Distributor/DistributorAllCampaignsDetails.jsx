@@ -4,17 +4,22 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useStateContext } from '../../context';
 import { CustomButton } from '../../components/Producer';
 import { CountBox, Loader } from '../../components';
-import { calculateBarPercentage } from '../../utils'
+import { calculateBarPercentage, formatDate } from '../../utils'
 import { profile } from '../../assets'
 
 const DistributorAllCampaignsDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { donate, getDonations, contract, address } = useStateContext();
+  const { buyStreamingRight, getDAs, getId, getTimeWindow, getCountryList, donate, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [amount, setAmount] = useState('');
   const [donators, setDonators] = useState([]);
+
+  const [timeWindow, setTimeWindow] = useState([]);
+  const [countryList, setCountryList] = useState([]);
+  const [price, setPrice] = useState();
+  const [isSteamingRightOwner, setIsSteamingRightOwner] = useState();
 
   const fetchDonators = async () => {
     const data = await getDonations(state.pId);
@@ -22,10 +27,43 @@ const DistributorAllCampaignsDetails = () => {
     setDonators(data);
   }
 
-  useEffect(() => {
-    if(contract) fetchDonators();
-  }, [contract, address])
+  // function to get Info about Distribution Agreement
+  const fetchTimeCountry = async () => {
+    setIsLoading(true);
+    const curentId = await getId();
+    
+    // fetch Time window and convert using formatDate()
+    const times = await getTimeWindow(curentId);
 
+    const reversedTime = times.map(time => {
+      return {
+        startDate: formatDate(new Date(time.startDate * 1000)),
+        deadline: formatDate(new Date(time.deadline * 1000))
+      };
+    });
+    setTimeWindow(reversedTime);
+
+    //fetch Counrty List
+    const countries = await getCountryList(curentId);
+    setCountryList(countries);
+
+    setIsLoading(false);
+  }
+
+  const getDAInfo = async () => {
+    setIsLoading(true);
+    const allDAs = await getDAs();
+    const curentId = await getId();
+    const price = allDAs[curentId].price.toString();
+    setPrice(price);
+
+    const isPricePaid = allDAs[curentId].isPricePaid;
+    setIsSteamingRightOwner(isPricePaid);
+
+    setIsLoading(false);
+  }
+
+  // function to "Donate"
   const handleDonate = async () => {
     setIsLoading(true);
 
@@ -34,6 +72,26 @@ const DistributorAllCampaignsDetails = () => {
     navigate('/distributor/');
     setIsLoading(false);
   }
+
+  // function to "Buy" rights
+  const buyRight = async () => {
+    setIsLoading(true);
+    const curentId = await getId();
+
+    await buyStreamingRight(curentId, price);
+    navigate('/distributor/');
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    if(contract) fetchDonators();
+  }, [contract, address])
+
+  useEffect(() => {
+    if(royaltiesRemunerationContract) 
+    fetchTimeCountry();
+    getDAInfo();
+  }, [royaltiesRemunerationContract, address])
 
   return (
     <div>
@@ -54,7 +112,7 @@ const DistributorAllCampaignsDetails = () => {
         </div>
       </div>
 
-      <div className="mt-[60px] flex lg:flex-row flex-col gap-5">
+      <div className="mt-[60px] flex flex-col gap-5">
         <div className="flex-[2] flex flex-col gap-[40px]">
           <div>
             <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Producer</h4>
@@ -114,13 +172,57 @@ const DistributorAllCampaignsDetails = () => {
               <CustomButton 
                 btnType="button"
                 title="Fund Campaign"
-                styles="w-full bg-[#8c6dfd]"
-                handleClick={handleDonate}
+                styles={state.target >= state.amountCollected ? "w-full bg-[#9fb4aa]" : "w-full bg-[#8c6dfd]"}
+                handleClick={state.target >= state.amountCollected ? () => {} : handleDonate}
               />
             </div>
           </div>
         </div>
       </div>
+
+      {countryList && timeWindow ? (
+            <>
+                <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase my-[30px]">Streaming right</h4>
+                <div className='flex lg:flex-row flex-col gap-5'>
+                <div className='flex-[0.8] flex-col gap-[40px]'>
+                  <div>
+                    <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Time Window</h4>
+                    {timeWindow.map((item, index) => (
+                      <div>
+                        <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[20px]">Start Date: {item.startDate}</p>
+                        <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[10px]">End Date: {item.deadline}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase mt-[20px]">Country list</h4>
+                    {countryList.map((item, index) => (
+                      <div className='mt-[10px]'>
+                        <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll">{item}</p>
+                    </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-[20px] flex-1 flex-col p-4 bg-[#e6e8eb] rounded-[10px]">
+                    <p className="font-epilogue fount-medium text-[20px] leading-[30px] text-center text-[#808191]">
+                      Price requested to redeem the streaming right
+                    </p>
+                    {price ? (
+                      <p className="font-epilogue font-bold sm:text-[25px] text-[18px] leading-[38px] text-center text-[#1dc071] mt-[10px]">{price} ETH</p>) : (
+                        <p className="font-epilogue font-normal sm:text-[25px] text-[18px] leading-[38px] text-center text-[#808191] mt-[10px]">No price yet</p>
+                      )}
+                    <div className="w-full mt-[10px]">
+                      <CustomButton 
+                        btnType="button"
+                        title="Buy"
+                        styles={isSteamingRightOwner ? "w-full bg-[#9fb4aa]" : "w-full bg-[#8c6dfd]"}
+                        handleClick={isSteamingRightOwner ? () => {} : buyRight}
+                      />
+                    </div>
+                  </div>
+                </div>
+            </>
+          ) : null}
     </div>
   )
 }
