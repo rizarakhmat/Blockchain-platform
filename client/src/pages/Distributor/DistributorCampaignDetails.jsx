@@ -10,7 +10,7 @@ import { profile, money } from '../../assets'
 const DistributorCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { buyStreamingRight, getDAs, getId, getTimeWindow, getCountryList, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
+  const { getNumberOfDAs, getDAs, getTimeWindow, getCountryList, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
@@ -19,21 +19,12 @@ const DistributorCampaignDetails = () => {
   const [timeWindow, setTimeWindow] = useState([]);
   const [countryList, setCountryList] = useState([]);
   const [price, setPrice] = useState();
+  const [isDASet, setIsDASet] = useState(false);
   const [isSteamingRightOwner, setIsSteamingRightOwner] = useState();
 
   // function to update form
   const handleFormFieldChange = (fieldName, e) => {
    setForm({ ...form, [fieldName]: e.target.value })
-  }
-
-  // function to pay price to get streaming rights
-  const buyRight = async () => {
-    setIsLoading(true);
-    const curentId = await getId();
-
-    await buyStreamingRight(curentId);
-    navigate('/distributor/');
-    setIsLoading(false);
   }
 
   const fetchDonators = async () => {
@@ -44,12 +35,12 @@ const DistributorCampaignDetails = () => {
     setIsLoading(false);
   }
 
+  // function to get Info about Distribution Agreement
   const fetchTimeCountry = async () => {
     setIsLoading(true);
-    const curentId = await getId();
     
     // fetch Time window and convert using formatDate()
-    const times = await getTimeWindow(curentId);
+    const times = await getTimeWindow(state.pId);
 
     const reversedTime = times.map(time => {
       return {
@@ -60,7 +51,7 @@ const DistributorCampaignDetails = () => {
     setTimeWindow(reversedTime);
 
     //fetch Counrty List
-    const countries = await getCountryList(curentId);
+    const countries = await getCountryList(state.pId);
     setCountryList(countries);
 
     setIsLoading(false);
@@ -69,13 +60,19 @@ const DistributorCampaignDetails = () => {
   const getDAInfo = async () => {
     setIsLoading(true);
     const allDAs = await getDAs();
-    const curentId = await getId();
-    const price = allDAs[curentId].price.toString();
-    setPrice(price);
+    const numberOfDAs = await getNumberOfDAs();
+    if (state.pId < numberOfDAs) {
+      if (allDAs[state.pId].isDASet) {
+        setIsDASet(allDAs[state.pId].isDASet);
+        const price = allDAs[state.pId].price.toString();
+        setPrice(price);
+  
+        const isPricePaid = allDAs[state.pId].isPricePaid;
+        setIsSteamingRightOwner(isPricePaid);
 
-    const isPricePaid = allDAs[curentId].isPricePaid;
-    setIsSteamingRightOwner(isPricePaid);
-
+        fetchTimeCountry();
+      }
+    }
     setIsLoading(false);
   }
 
@@ -101,9 +98,8 @@ const DistributorCampaignDetails = () => {
 
   useEffect(() => {
     if(royaltiesRemunerationContract) 
-    fetchTimeCountry();
     getDAInfo();
-  }, [royaltiesRemunerationContract, address])
+    }, [royaltiesRemunerationContract, address])
 
   return (
     <div>
@@ -121,7 +117,10 @@ const DistributorCampaignDetails = () => {
         <div className="flex md:w-[150px] w-full flex-wrap justify-between md:mt-[50px]">
           <CountBox title="You payed" value={calculateSum(address)} />
           <CountBox title="#Funders" value={donators.length} />
-          <CountBox title="Days left" value={daysLeft(timeWindow.map(i => i.deadline))} />
+          {isDASet ? (
+            <CountBox title="Days left" value={daysLeft(timeWindow.map(i => i.deadline))} />
+          ) : null}
+          
         </div>
       </div> 
 
@@ -140,7 +139,15 @@ const DistributorCampaignDetails = () => {
               </div>
             </div>
           </div>
+          
+          <div>
+            <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Title</h4>
 
+              <div className="mt-[20px]">
+                <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{state.title}</p>
+              </div>
+          </div>
+          
           <div>
             <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Story</h4>
 
@@ -163,7 +170,7 @@ const DistributorCampaignDetails = () => {
           </div>
 
           <>
-          {countryList && timeWindow ? (
+          {isDASet ? (
             <>
                 <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase">Streaming right</h4>
                 <div className='flex lg:flex-row flex-col gap-5'>
@@ -194,6 +201,7 @@ const DistributorCampaignDetails = () => {
             </>
           ) : null}
     
+          {/* {isSteamingRightOwner ? () : ()} */}
             <form /* onSubmit={}  */ className='flex-1'>
               <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Royalties remuneration</h4>
                 <div className="mt-[20px]">

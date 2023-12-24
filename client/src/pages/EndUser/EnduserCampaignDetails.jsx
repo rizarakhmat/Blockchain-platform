@@ -5,13 +5,13 @@ import { useStateContext } from '../../context'
 import { CustomButton, FormField } from '../../components/Producer'
 import { CountBox, Loader } from '../../components'
 import { calculateBarPercentage } from '../../utils'
-import { profile, money } from '../../assets'
+import { profile } from '../../assets'
 
 
 const EnduserCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { getSharesOf, getDonations, contract, nftMovieTokenContract, FractionalizeNFTContract, address } = useStateContext();
+  const { getSharesOf, getDonations, contract, FractionalizeNFTContract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
@@ -35,13 +35,25 @@ const EnduserCampaignDetails = () => {
     setIsLoading(false);
   }
 
+  // internal function to calculate Sum of all donationions of this address
+  const calculateSum = (owner) => {
+    let sum = 0;
+
+    donators.forEach((item) => {
+      for (const prop in item) {
+
+        if (prop === "donator" && item.donator === owner) {
+          sum += parseFloat(item.donations);
+        } 
+      }
+    })
+
+    return sum;
+  };
+
   useEffect(() => {
     if(contract) fetchDonators();
   }, [contract, address])
-
-  useEffect(() => {
-    if(nftMovieTokenContract) fetchNumberOfTokens(); 
-  }, [nftMovieTokenContract, address])
 
   useEffect(() => {
     if(FractionalizeNFTContract) fetchShares(); 
@@ -99,6 +111,14 @@ const EnduserCampaignDetails = () => {
             </div>
           </div>
 
+          <div>
+            <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Title</h4>
+
+              <div className="mt-[20px]">
+                <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{state.title}</p>
+              </div>
+          </div>
+          
           <div>
             <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Story</h4>
 

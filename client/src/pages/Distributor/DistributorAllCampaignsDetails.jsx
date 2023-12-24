@@ -5,12 +5,12 @@ import { useStateContext } from '../../context';
 import { CustomButton } from '../../components/Producer';
 import { CountBox, Loader } from '../../components';
 import { calculateBarPercentage, formatDate } from '../../utils'
-import { profile } from '../../assets'
+import { profile, money } from '../../assets'
 
 const DistributorAllCampaignsDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { buyStreamingRight, getDAs, getId, getTimeWindow, getCountryList, donate, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
+  const { buyStreamingRight, getNumberOfDAs, getDAs, getTimeWindow, getCountryList, donate, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [amount, setAmount] = useState('');
@@ -19,6 +19,7 @@ const DistributorAllCampaignsDetails = () => {
   const [timeWindow, setTimeWindow] = useState([]);
   const [countryList, setCountryList] = useState([]);
   const [price, setPrice] = useState();
+  const [isDASet, setIsDASet] = useState(false);
   const [isSteamingRightOwner, setIsSteamingRightOwner] = useState();
 
   const fetchDonators = async () => {
@@ -30,10 +31,9 @@ const DistributorAllCampaignsDetails = () => {
   // function to get Info about Distribution Agreement
   const fetchTimeCountry = async () => {
     setIsLoading(true);
-    const curentId = await getId();
     
     // fetch Time window and convert using formatDate()
-    const times = await getTimeWindow(curentId);
+    const times = await getTimeWindow(state.pId);
 
     const reversedTime = times.map(time => {
       return {
@@ -44,7 +44,7 @@ const DistributorAllCampaignsDetails = () => {
     setTimeWindow(reversedTime);
 
     //fetch Counrty List
-    const countries = await getCountryList(curentId);
+    const countries = await getCountryList(state.pId);
     setCountryList(countries);
 
     setIsLoading(false);
@@ -53,13 +53,19 @@ const DistributorAllCampaignsDetails = () => {
   const getDAInfo = async () => {
     setIsLoading(true);
     const allDAs = await getDAs();
-    const curentId = await getId();
-    const price = allDAs[curentId].price.toString();
-    setPrice(price);
+    const numberOfDAs = await getNumberOfDAs();
+    if (state.pId < numberOfDAs) {
+      if (allDAs[state.pId].isDASet) {
+        setIsDASet(allDAs[state.pId].isDASet);
+        const price = allDAs[state.pId].price.toString();
+        setPrice(price);
+  
+        const isPricePaid = allDAs[state.pId].isPricePaid;
+        setIsSteamingRightOwner(isPricePaid);
 
-    const isPricePaid = allDAs[curentId].isPricePaid;
-    setIsSteamingRightOwner(isPricePaid);
-
+        fetchTimeCountry();
+      }
+    }
     setIsLoading(false);
   }
 
@@ -76,9 +82,8 @@ const DistributorAllCampaignsDetails = () => {
   // function to "Buy" rights
   const buyRight = async () => {
     setIsLoading(true);
-    const curentId = await getId();
 
-    await buyStreamingRight(curentId, price);
+    await buyStreamingRight(state.pId, price);
     navigate('/distributor/');
     setIsLoading(false);
   }
@@ -89,7 +94,6 @@ const DistributorAllCampaignsDetails = () => {
 
   useEffect(() => {
     if(royaltiesRemunerationContract) 
-    fetchTimeCountry();
     getDAInfo();
   }, [royaltiesRemunerationContract, address])
 
@@ -126,6 +130,14 @@ const DistributorAllCampaignsDetails = () => {
                 <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]"># Campaigns</p>
               </div>
             </div>
+          </div>
+
+          <div>
+            <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Title</h4>
+
+              <div className="mt-[20px]">
+                <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{state.title}</p>
+              </div>
           </div>
 
           <div>
@@ -171,7 +183,7 @@ const DistributorAllCampaignsDetails = () => {
 
               <CustomButton 
                 btnType="button"
-                title="Fund Campaign"
+                title={state.target >= state.amountCollected ? "Target has now been met." : "Fund Campaign"}
                 styles={state.target >= state.amountCollected ? "w-full bg-[#9fb4aa]" : "w-full bg-[#8c6dfd]"}
                 handleClick={state.target >= state.amountCollected ? () => {} : handleDonate}
               />
@@ -180,7 +192,7 @@ const DistributorAllCampaignsDetails = () => {
         </div>
       </div>
 
-      {countryList && timeWindow ? (
+      {isDASet ? (
             <>
                 <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase my-[30px]">Streaming right</h4>
                 <div className='flex lg:flex-row flex-col gap-5'>
@@ -214,7 +226,7 @@ const DistributorAllCampaignsDetails = () => {
                     <div className="w-full mt-[10px]">
                       <CustomButton 
                         btnType="button"
-                        title="Buy"
+                        title={isSteamingRightOwner ? "You already posess the Streaming right" : "Buy"}
                         styles={isSteamingRightOwner ? "w-full bg-[#9fb4aa]" : "w-full bg-[#8c6dfd]"}
                         handleClick={isSteamingRightOwner ? () => {} : buyRight}
                       />
@@ -222,7 +234,15 @@ const DistributorAllCampaignsDetails = () => {
                   </div>
                 </div>
             </>
-          ) : null}
+          ) : 
+          <div className="my-[10px] w-full flex items-center p-4 bg-[#8c6dfd] h-[130px] rounded-[10px]">
+            <img src={money} alt="money" className="w-[40px] h-[40px] object-contain"/>
+              <div>
+                <h4 className="font-epilogue font-semibold text-[20px] leading-[22px] text-white p-4">Are you interesting in getting Streaming Right?</h4>
+                 <p className="font-epilogue font-normal leading-[22px] text-white p-4">Please wait until the film is ready for release and a distribution agreement is in place.</p>
+              </div>            
+          </div>
+          }
     </div>
   )
 }

@@ -385,14 +385,10 @@ export const StateContextProvider = ({ children }) => {
     }
   }
 
-  const getId = async () => {
+  const getNumberOfDAs = async () => {
     const numberOfCampaigns = await royaltiesRemunerationContract.call('numberOfCampaigns');
 
-    if (numberOfCampaigns.toString() == 0) {
-      return 0;
-    } else {
-    return numberOfCampaigns.toString() - 1;
-    }
+    return numberOfCampaigns.toString();
   }
 
   const getTimeWindow = async (_id) => {
@@ -457,7 +453,7 @@ export const StateContextProvider = ({ children }) => {
         // RoyaltiesRemuneration
         setDistributionAggrem,
         buyStreamingRight,
-        getId,
+        getNumberOfDAs,
         getTimeWindow,
         getCountryList,
         getDAs

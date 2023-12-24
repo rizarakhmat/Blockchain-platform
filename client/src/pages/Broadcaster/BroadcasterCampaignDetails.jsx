@@ -5,13 +5,13 @@ import { useStateContext } from '../../context'
 import { CustomButton, FormField } from '../../components/Producer'
 import { CountBox, Loader } from '../../components'
 import { calculateBarPercentage, formatDate } from '../../utils'
-import { profile, money } from '../../assets'
+import { profile } from '../../assets'
 
 
 const BroadcasterCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { getSharesOf, getId, getTimeWindow, getCountryList, setDistributionAggrem, getDonations, contract, royaltiesRemunerationContract, FractionalizeNFTContract, address } = useStateContext();
+  const { getDAs, getSharesOf, getTimeWindow, getCountryList, setDistributionAggrem, getDonations, contract, royaltiesRemunerationContract, FractionalizeNFTContract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
@@ -22,6 +22,9 @@ const BroadcasterCampaignDetails = () => {
 
   const [timeWindow, setTimeWindow] = useState([]);
   const [countryList, setCountryList] = useState([]);
+  const [isDASet, setIsDASet] = useState(false);
+  const [isPricePaid, setIsPricePaid] = useState(false);
+  const [distributor, setDistributor] = useState();
 
   const [form, setForm] = useState({
     name: '',
@@ -36,6 +39,21 @@ const BroadcasterCampaignDetails = () => {
    setForm({ ...form, [fieldName]: e.target.value })
   }
 
+  // function to get DA info
+  const getDAInfo = async () => {
+    setIsLoading(true);
+    const allDAs = await getDAs();
+    if (allDAs[state.pId].isDASet) {
+      setIsDASet(allDAs[state.pId].isDASet);
+
+      const isPricePaid = allDAs[state.pId].isPricePaid;
+      setIsPricePaid(isPricePaid);
+      
+      setDistributor(allDAs[state.pId].distributorName);
+    }
+    setIsLoading(false);
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -47,11 +65,9 @@ const BroadcasterCampaignDetails = () => {
   }
 
   const fetchTimeCountry = async () => {
-    setIsLoading(true);
-    const curentId = await getId();
-    
+    setIsLoading(true);    
     // fetch Time window and convert using formatDate()
-    const times = await getTimeWindow(curentId);
+    const times = await getTimeWindow(state.pId);
 
     const reversedTime = times.map(time => {
       return {
@@ -62,7 +78,7 @@ const BroadcasterCampaignDetails = () => {
     setTimeWindow(reversedTime);
 
     //fetch Counrty List
-    const countries = await getCountryList(curentId);
+    const countries = await getCountryList(state.pId);
     setCountryList(countries);
     
     setIsLoading(false);
@@ -94,7 +110,9 @@ const BroadcasterCampaignDetails = () => {
   }, [FractionalizeNFTContract, address])
   
   useEffect(() => {
-    if(royaltiesRemunerationContract) fetchTimeCountry(); 
+    if(royaltiesRemunerationContract) 
+    getDAInfo();
+    fetchTimeCountry(); 
   }, [royaltiesRemunerationContract, address])
 
   // internal functions to update country list
@@ -181,6 +199,14 @@ const BroadcasterCampaignDetails = () => {
                 <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]"># Campaigns</p>
               </div>
             </div>
+          </div>
+          
+          <div>
+            <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Title</h4>
+
+              <div className="mt-[20px]">
+                <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{state.title}</p>
+              </div>
           </div>
 
           <div>
@@ -276,9 +302,9 @@ const BroadcasterCampaignDetails = () => {
     
                   <div className="mt-[20px]">
                     <CustomButton 
-                      btnType={countryList && timeWindow ? "button" : "submit"}
-                      title={countryList && timeWindow ? "Distribution agreement is already settled" : "Set Distribution agreement"}
-                      styles={countryList && timeWindow ? "w-full bg-[#9fb4aa]" : "w-full bg-[#1dc071]"}
+                      btnType={isDASet ? "button" : "submit"}
+                      title={isDASet ? "Distribution agreement has been already settled" : "Set Distribution agreement"}
+                      styles={isDASet ? "w-full bg-[#9fb4aa]" : "w-full bg-[#1dc071]"}
                     />
                   </div>
                 </form>
@@ -292,7 +318,7 @@ const BroadcasterCampaignDetails = () => {
           </>
 
           <>
-          {isOwnerOfShare && countryList && timeWindow ? (
+          {isDASet ? (
             <>
               <div>
                 <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase mb-[20px]">Streaming right</h4>
@@ -315,6 +341,17 @@ const BroadcasterCampaignDetails = () => {
                     ))}
                   </div>
                 </div>
+              </div>
+            </>
+          ) : null}
+          </>
+
+          <>
+          {isPricePaid ? (
+            <>
+              <div className='flex flex-col gap-[10px]'>
+                <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Distributor</h4>
+                <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[10px]">{distributor}</p>
               </div>
             </>
           ) : null}
