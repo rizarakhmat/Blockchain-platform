@@ -31,6 +31,8 @@ contract FractionalizeNFT is IERC721Receiver {
 
   mapping(uint256 => LockedNFTMovie) public idToNFTs;
 
+  mapping(address => uint256[]) public tokensPerUser;
+
   uint256 totalBalance;
 
   constructor(IERC721 _nftMovie, IERC20 _nftMovieToken) {
@@ -42,6 +44,28 @@ contract FractionalizeNFT is IERC721Receiver {
   modifier onlyProducer() {
     require(_producer == msg.sender, "Invalid operation");
     _;
+  }
+
+  ////////////////////////////////// ERC721  ///////////////////////////
+
+  // send (lock) erc721 nft from NFTMovie to this SC 
+  function lockNFTMovie(uint256 _tokenId, string memory _title, string memory _description, string memory _movieURI) external onlyProducer returns (uint256) {
+    require(nftMovie.ownerOf(_tokenId) == msg.sender, "You don't own this NFT!");
+
+    nftMovie.safeTransferFrom(msg.sender, address(this), _tokenId);
+
+    //update mapping
+    LockedNFTMovie storage idToNFT = idToNFTs[_tokenId];
+    idToNFT.tokenId = _tokenId;
+    idToNFT.title = _title;
+    idToNFT.description = _description;
+    idToNFT.movieURI = _movieURI;
+    idToNFT.producer = msg.sender;
+    idToNFT.isLocked = true;
+
+    _lockedNFTIdCounter++;
+
+    return _lockedNFTIdCounter - 1;
   }
 
   /////////////////////////////////// ERC20 ////////////////////
@@ -63,16 +87,16 @@ contract FractionalizeNFT is IERC721Receiver {
 
   // internal function that send erc20 token from this SC to reciver
   function sendERC20Token (address _to, uint256 _amount) internal {
-    require(_amount > 0, "_amount should be > 0");
+    require(_amount > 0, "Amount must be greater than zero");
 
     nftMovieToken.safeTransfer(_to, _amount);
   }
 
 
   // function that airdrop erc20 tokens from this SC to [] addresses
-  function distributeERC20Tokens(uint256 _amount, address[] memory _buyers, uint256[] memory _donations) public onlyProducer {
+  function distributeERC20Tokens(uint256 _amount, uint256 _tokenId,  address[] memory _buyers, uint256[] memory _donations) public onlyProducer {
     //update mapping
-    LockedNFTMovie storage idToNFT = idToNFTs[_lockedNFTIdCounter];
+    LockedNFTMovie storage idToNFT = idToNFTs[_tokenId];
 
     uint256 totalTokens = _amount;
     uint256 target = 0;
@@ -90,34 +114,17 @@ contract FractionalizeNFT is IERC721Receiver {
         _buyers[i],
         numberOfTokens
       );
+
+      associateOwnershipWithNFT(_buyers[i], _tokenId);
     }
+
   }
 
-  ////////////////////////////////// ERC721  ///////////////////////////
+  function associateOwnershipWithNFT(address _tokenHolder, uint256 _tokenId) public returns (uint256[] memory){
+        tokensPerUser[_tokenHolder].push(_tokenId);
 
-  // send (lock) erc721 nft from NFTMovie to this SC 
-  function lockNFTMovie(uint256 _tokenId, string memory _title, string memory _description, string memory _movieURI) external onlyProducer returns (uint256) {
-    require(nftMovie.ownerOf(_tokenId) == msg.sender, "You don't own this NFT!");
-
-    nftMovie.safeTransferFrom(
-      msg.sender,
-      address(this),
-      _tokenId
-    );
-
-    //update mapping
-    LockedNFTMovie storage idToNFT = idToNFTs[_lockedNFTIdCounter];
-    idToNFT.tokenId = _tokenId;
-    idToNFT.title = _title;
-    idToNFT.description = _description;
-    idToNFT.movieURI = _movieURI;
-    idToNFT.producer = msg.sender;
-    idToNFT.isLocked = true;
-
-    _lockedNFTIdCounter++;
-
-    return _lockedNFTIdCounter - 1;
-  }
+        return tokensPerUser[_tokenHolder];
+    }
 
   ///////////////////////////////////// read functions //////////////////////
   
@@ -136,6 +143,31 @@ contract FractionalizeNFT is IERC721Receiver {
 
     return allLockedNFTs;
   }
+
+  // see all shares of NFT
+  function getSharesOfNFT(uint256 _id) view public returns (uint256[] memory) {
+      return (idToNFTs[_id].shares);
+  }
+
+  // shareOf() see #tokens of NFT belonging to address
+ function shareOf(address _owner, uint256 _id) view public returns (uint256[] memory) {
+        LockedNFTMovie storage nft = idToNFTs[_id];
+        address[] storage buyers = nft.buyers;
+        uint256[] memory shares = nft.shares;
+        uint256[] memory ownedShares = new uint256[](buyers.length);
+        
+        for (uint256 i = 0; i < buyers.length; i++) {
+            if (buyers[i] == _owner) {
+                ownedShares[i] = shares[i];
+            }
+        }
+
+      return (ownedShares);
+  } 
+
+  function getTokensForUser(address _user) public view returns (uint256[] memory) {
+        return tokensPerUser[_user];
+    }
 
   //required function for ERC721
   function onERC721Received(

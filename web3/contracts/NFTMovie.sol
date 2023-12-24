@@ -69,7 +69,7 @@ contract NFTMovie is ERC721Base {
 
     ////////////////////////////////// read functions ///////////////////
 
-     function getNFT(uint256 _id) view public returns (NFT memory) {
+    function getNFT(uint256 _id) view public returns (NFT memory) {
         return (idToNFTs[_id]);
     }
 
