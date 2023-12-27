@@ -10,11 +10,18 @@ import { profile, money } from '../../assets'
 const DistributorCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { getNumberOfDAs, getDAs, getTimeWindow, getCountryList, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
+  const { buyStreamingRight, payRoyalties, getNumberOfDAs, getDAs, getTimeWindow, getCountryList, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
-  const [form, setForm] = useState({ users: '' });
+  // states needed for remunirateRoyalties();
+  const [buyers, setBuyers] = useState([]);
+  const [donations, setDonations] = useState([]);
+  const [form, setForm] = useState({ 
+    numberOfUsers: '',
+    subscriptionFee: '',
+    shareOfRevenue: ''
+  });
 
   const [timeWindow, setTimeWindow] = useState([]);
   const [countryList, setCountryList] = useState([]);
@@ -24,13 +31,12 @@ const DistributorCampaignDetails = () => {
 
   // function to update form
   const handleFormFieldChange = (fieldName, e) => {
-   setForm({ ...form, [fieldName]: e.target.value })
+   setForm({ ...form, [fieldName]: e.target.value });
   }
 
   const fetchDonators = async () => {
     setIsLoading(true);
     const data = await getDonations(state.pId);
-
     setDonators(data);
     setIsLoading(false);
   }
@@ -75,6 +81,34 @@ const DistributorCampaignDetails = () => {
     }
     setIsLoading(false);
   }
+
+  // function to "Buy" rights
+  const buyRight = async () => {
+    setIsLoading(true);
+
+    await buyStreamingRight(state.pId, price);
+    navigate('/distributor/');
+    setIsLoading(false);
+  }
+
+  const remunerateRoyalties = async (e) => {
+    e.preventDefault();
+    const data1 = donators.map(i => i.donator);
+    const data2 = donators.map(i => Math.floor(parseFloat(i.donations)));
+    
+    setIsLoading(true);
+    const data = await payRoyalties(
+      state.pId,
+      data1, 
+      data2,
+      state.target,
+      //{ ...form, shareOfRevenue: (form.shareOfRevenue / 100).toFixed(2)}
+      { ...form}
+    );
+    setIsLoading(false);
+    navigate('/distributor/');
+  }
+
 
   // internal function to calculate Sum of all donationions of this address
   const calculateSum = (owner) => {
@@ -174,7 +208,7 @@ const DistributorCampaignDetails = () => {
             <>
                 <h4 className="font-epilogue font-semibold text-[20px] text-[#1dc071] uppercase">Streaming right</h4>
                 <div className='flex lg:flex-row flex-col gap-5'>
-                <div className='flex-[0.8] flex-col gap-[40px]'>
+                <div className='flex-1 flex-col gap-[40px]'>
                   <div>
                     <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Time Window</h4>
                     {timeWindow.map((item, index) => (
@@ -196,40 +230,72 @@ const DistributorCampaignDetails = () => {
                     <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase mt-[20px]">Price requested to redeem the streaming right</h4>
                     <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[10px]">{price}</p>
                   </div>
+                  <div className="w-full mt-[10px]">
+                    <CustomButton 
+                      btnType="button"
+                      title={isSteamingRightOwner ? "You already posess the Streaming right" : "Buy"}
+                      styles={isSteamingRightOwner ? "w-full bg-[#9fb4aa]" : "w-full bg-[#8c6dfd]"}
+                      handleClick={isSteamingRightOwner ? () => {} : buyRight}
+                    />
+                  </div>
                 </div>
                 </div>
             </>
           ) : null}
     
-          {/* {isSteamingRightOwner ? () : ()} */}
-            <form /* onSubmit={}  */ className='flex-1'>
-              <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Royalties remuneration</h4>
-                <div className="mt-[20px]">
-                  <FormField 
-                    labelName="Numbers of users"
-                    placeholder="Enter # users"
-                    inputType="text"
-                    inputMode="numeric"
-                    value={form.users}
-                    handleChange={(e) => handleFormFieldChange('users', e)}
-                  />
-                </div>
-              
-              <div>
-                <div className="mt-[20px] flex flex-col p-4 bg-[#e6e8eb] rounded-[10px]">
-                  <p className="font-epilogue fount-medium text-[20px] leading-[30px] text-center text-[#808191]">
-                    Payment of the royalties back to the funders of the movie
-                  </p>
-                  <div className="mt-[30px]">
-                    <CustomButton 
-                      btnType="submit"
-                      title="Pay royalties"
-                      styles="w-full bg-[#1dc071]"
-                    />
-                  </div>
-                </div>
-              </div>
-            </form>
+          {isSteamingRightOwner ? (
+             <form onSubmit={remunerateRoyalties}  className='flex-1'>
+             <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Royalties remuneration</h4>
+               <div className="mt-[20px]">
+                 <FormField 
+                   labelName="Numbers of users"
+                   placeholder="Enter # users"
+                   inputType="text"
+                   inputMode="numeric"
+                   value={form.numberOfUsers}
+                   handleChange={(e) => handleFormFieldChange('numberOfUsers', e)}
+                 />
+               </div>
+               <div className="mt-[20px]">
+                 <FormField 
+                   labelName="User subscription fee"
+                   placeholder="1 ETH"
+                   inputType="text"
+                   inputMode="numeric"
+                   value={form.subscriptionFee}
+                   handleChange={(e) => handleFormFieldChange('subscriptionFee', e)}
+                 />
+               </div>
+               <div className="mt-[20px]">
+                 <FormField 
+                   labelName="Share of revenue"
+                   placeholder="10"
+                   inputType="text"
+                   inputMode="numeric"
+                   value={form.shareOfRevenue}
+                   handleChange={(e) => handleFormFieldChange('shareOfRevenue', e)}
+                 />
+               </div>
+             
+             <div>
+               <div className="mt-[20px] flex flex-col p-4 bg-[#e6e8eb] rounded-[10px]">
+                 <p className="font-epilogue fount-medium text-[20px] leading-[30px] text-center text-[#808191]">
+                   Payment of the royalties back to the funders of the movie
+                 </p>
+                 <div className="mt-[30px]">
+                   <CustomButton 
+                     btnType="submit"
+                     title="Pay royalties"
+                     styles="w-full bg-[#1dc071]"
+                   />
+                 </div>
+               </div>
+             </div>
+           </form>
+          ) : (
+            null
+          )}
+           
           </>
         </div>  
       </div>

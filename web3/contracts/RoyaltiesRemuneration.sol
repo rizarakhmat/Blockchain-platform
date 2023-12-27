@@ -17,9 +17,10 @@ contract RoyaltiesRemuneration {
         bool isPricePaid;
         // Royalties info set by Distributor
         uint256 numberOfUsers;
+        uint256 subscriptionFee;
         address[] buyers;
         uint256[] donations;
-        uint256 totalRevenue;
+        uint256 shareOfRevenue;
         uint256[] royalties;
         bool isRoyaltiesRemunerated;
     }
@@ -77,22 +78,24 @@ contract RoyaltiesRemuneration {
     }
     
     // function called by Distributor to renumirate royalties to Buyers; called 
-    function remunerateRoyalties(uint256 _id, uint256 _numberOfUsers, address payable[] memory _buyers, uint256[] memory _donations, uint256 _target, uint256 _totalRevenue) public payable {
+    function remunerateRoyalties(uint256 _id, uint256 _numberOfUsers, address payable[] memory _buyers, uint256[] memory _donations, uint256 _target, uint256 _subscriptionFee, uint256 _shareOfRevenue) public payable {
         require(_numberOfUsers > 0, "Number of users is not provided");
+        require(_subscriptionFee > 0, "Subscription Fee is not provided");
 
         DistributionAgreementInfo storage campaign = distributionAgreementMap[_id];
 
-        require(campaign.isPricePaid, "You don't have right to this movie and can't remunirate royalties");
+        require(campaign.isPricePaid, "You don't have right to this movie, therefore can't remunirate royalties");
 
         campaign.numberOfUsers = _numberOfUsers;
+        campaign.subscriptionFee = _subscriptionFee;
         for (uint256 i = 0; i < _buyers.length; i++) {
             campaign.buyers.push(_buyers[i]);
             campaign.donations.push(_donations[i]);
         }
-        campaign.totalRevenue = _totalRevenue;
+        campaign.shareOfRevenue = _shareOfRevenue;
         
         for (uint256 i = 0; i < campaign.buyers.length; i++) {
-            uint256 individualRoyalty = (campaign.totalRevenue * campaign.donations[i]) / _target;
+            uint256 individualRoyalty = (campaign.numberOfUsers * campaign.subscriptionFee * (campaign.shareOfRevenue / 100 ) * campaign.donations[i]) / _target;
             require(address(this).balance >= individualRoyalty, "Insufficient balance");
             (bool sent,) = payable(campaign.buyers[i]).call{value: individualRoyalty}("");
 

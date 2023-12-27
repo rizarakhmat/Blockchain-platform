@@ -175,12 +175,15 @@ const BroadcasterCampaignDetails = () => {
             {donators.map((item, index) => (
               isOwnerOfShare ? (
                 <>
+                  {item.donator === address ? (
+                    <>
                     <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Ownership</h4>
-    
                     <div className="mt-[20px]">
                       <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You are the owner of {((item.donations * 100) / state.target).toFixed(2)} % of the "{state.title}" NFT.</p>
                     </div>
-                  </>
+                    </>
+                  ) : null }
+                </>
               ) : (
               null
               )

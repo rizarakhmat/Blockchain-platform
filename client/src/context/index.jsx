@@ -1,6 +1,6 @@
 import React, { useContext, createContext } from 'react';
 import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS, NFTMOVIETOKEN_ADDRESS, FRACTIONALIZENFT_ADDRESS, ROYALTIESREMUNERATION_ADDRESS } from '../constants/addresses'
-import { useAddress, useContract, useMetamask, useContractWrite, useContractRead } from '@thirdweb-dev/react';
+import { useAddress, useContract, useMetamask, useContractWrite } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 
 const StateContext = createContext();
@@ -33,6 +33,7 @@ export const StateContextProvider = ({ children }) => {
   // call RoyaltiesRemuneration SC
   const { mutateAsync: setDistributionAggrement } = useContractWrite(royaltiesRemunerationContract, "setDistributionAggrement");
   const { mutateAsync: buyStreamRight } = useContractWrite(royaltiesRemunerationContract, "buyStreamingRights");
+  const { mutateAsync: remunerateRoyalties } = useContractWrite(royaltiesRemunerationContract, "remunerateRoyalties");
 
 
   const address = useAddress();
@@ -385,6 +386,37 @@ export const StateContextProvider = ({ children }) => {
     }
   }
 
+  const payRoyalties = async (_id, _buyers, _donations, _target, form) => {
+    try {
+      const amount = form.numberOfUsers * form.subscriptionFee * (form.shareOfRevenue / 100);
+      
+      const parsedDonations = [];
+      for(let i = 0; i < _donations.length; i++) {
+        parsedDonations.push(ethers.BigNumber.from(_donations[i]));
+      }
+      console.log(parsedDonations);
+
+      const data = await remunerateRoyalties({ args: [
+        _id,
+        form.numberOfUsers,
+        _buyers,
+        parsedDonations,
+        ethers.utils.parseEther(_target.toString()),
+        form.subscriptionFee,
+        form.shareOfRevenue
+        ],
+        overrides: {
+          value: ethers.utils.parseEther(amount.toString()),
+          gasLimit: 1000000,
+          gasPrice: 0,
+        },
+      });
+      console.info("RoyaltiesRemuneration contract remunerateRoyalties() call successs", data);
+    } catch (err) {
+      console.error("RoyaltiesRemuneration contract remunerateRoyalties() call failure", err);
+    }    
+  }
+
   const getNumberOfDAs = async () => {
     const numberOfCampaigns = await royaltiesRemunerationContract.call('numberOfCampaigns');
 
@@ -453,6 +485,7 @@ export const StateContextProvider = ({ children }) => {
         // RoyaltiesRemuneration
         setDistributionAggrem,
         buyStreamingRight,
+        payRoyalties,
         getNumberOfDAs,
         getTimeWindow,
         getCountryList,
