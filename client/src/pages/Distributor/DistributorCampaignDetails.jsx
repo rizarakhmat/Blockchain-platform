@@ -95,14 +95,14 @@ const DistributorCampaignDetails = () => {
     e.preventDefault();
     const data1 = donators.map(i => i.donator);
     const data2 = donators.map(i => Math.floor(parseFloat(i.donations)));
-    
+    console.log(data1);
+    console.log(data2);
     setIsLoading(true);
     const data = await payRoyalties(
       state.pId,
       data1, 
       data2,
       state.target,
-      //{ ...form, shareOfRevenue: (form.shareOfRevenue / 100).toFixed(2)}
       { ...form}
     );
     setIsLoading(false);

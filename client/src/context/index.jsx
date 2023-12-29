@@ -1,5 +1,5 @@
 import React, { useContext, createContext } from 'react';
-import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS, NFTMOVIETOKEN_ADDRESS, FRACTIONALIZENFT_ADDRESS, ROYALTIESREMUNERATION_ADDRESS } from '../constants/addresses'
+import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS, NFTMOVIETOKEN_ADDRESS, FRACTIONALIZENFT_ADDRESS, ROYALTIESREMUNERATION_ADDRESS, VOTING_ADDRESS } from '../constants/addresses'
 import { useAddress, useContract, useMetamask, useContractWrite } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 
@@ -12,6 +12,7 @@ export const StateContextProvider = ({ children }) => {
   const { contract: nftMovieTokenContract } = useContract(NFTMOVIETOKEN_ADDRESS);
   const { contract: FractionalizeNFTContract } = useContract(FRACTIONALIZENFT_ADDRESS);
   const { contract: royaltiesRemunerationContract } = useContract(ROYALTIESREMUNERATION_ADDRESS);
+  const { contract: votingContract } = useContract(VOTING_ADDRESS);
 
 
   // call CrowdFunding SC
@@ -34,6 +35,13 @@ export const StateContextProvider = ({ children }) => {
   const { mutateAsync: setDistributionAggrement } = useContractWrite(royaltiesRemunerationContract, "setDistributionAggrement");
   const { mutateAsync: buyStreamRight } = useContractWrite(royaltiesRemunerationContract, "buyStreamingRights");
   const { mutateAsync: remunerateRoyalties } = useContractWrite(royaltiesRemunerationContract, "remunerateRoyalties");
+  
+  // call Voting SC
+  const { mutateAsync: candidateAdd} = useContractWrite(votingContract, "addCandidate")
+  const { mutateAsync: candidateRemove} = useContractWrite(votingContract, "removeCandidate")
+  const { mutateAsync: acceptVote} = useContractWrite(votingContract, "voteAccept")
+  const { mutateAsync: denyVote} = useContractWrite(votingContract, "voteDeny")
+  
 
 
   const address = useAddress();
@@ -389,12 +397,11 @@ export const StateContextProvider = ({ children }) => {
   const payRoyalties = async (_id, _buyers, _donations, _target, form) => {
     try {
       const amount = form.numberOfUsers * form.subscriptionFee * (form.shareOfRevenue / 100);
-      
+            
       const parsedDonations = [];
       for(let i = 0; i < _donations.length; i++) {
         parsedDonations.push(ethers.BigNumber.from(_donations[i]));
       }
-      console.log(parsedDonations);
 
       const data = await remunerateRoyalties({ args: [
         _id,
@@ -446,7 +453,85 @@ export const StateContextProvider = ({ children }) => {
 
     return allDAs;
   }
+
+  //////////////////////////////// Voting SC functions
+
+  const addCandidate  = async (_name) => {
+    try {
+      const data = await candidateAdd({ args: [
+        _name
+      ],
+      overrides: {
+        gasLimit: 1000000,
+        gasPrice: 0,
+      },
+     });
+      console.info("VotingSC call addCandidate() successs", data);
+    } catch (err) {
+      console.error("VotingSC call addCandidate() failure", err);
+    }
+  }
   
+  const removeCandidate  = async (_name) => {
+    try {
+      const data = await candidateRemove({ args: [
+        _name
+      ],
+      overrides: {
+        gasLimit: 1000000,
+        gasPrice: 0,
+      },
+     });
+      console.info("VotingSC call addCandidate() successs", data);
+    } catch (err) {
+      console.error("VotingSC call addCandidate() failure", err);
+    }
+  }
+  
+  const Accept  = async (_candidateIndex) => {
+    try {
+      const data = await acceptVote({ args: [
+        _candidateIndex
+      ],
+      overrides: {
+        gasLimit: 1000000,
+        gasPrice: 0,
+      },
+     });
+      console.info("VotingSC call voteAccept() successs", data);
+    } catch (err) {
+      console.error("VotingSC call voteAccept() failure", err);
+    }
+  }
+  
+  const Deny  = async (_candidateIndex) => {
+    try {
+      const data = await denyVote({ args: [
+        _candidateIndex
+      ],
+      overrides: {
+        gasLimit: 1000000,
+        gasPrice: 0,
+      },
+     });
+      console.info("VotingSC call voteDeny() successs", data);
+    } catch (err) {
+      console.error("VotingSC call voteDeny() failure", err);
+    }
+  }
+
+  const readCandidates = async () => {
+    const candidatesList = await votingContract.call("getAllVotesOfCandiates");
+  
+    // transfer array of data to human readable format
+    const parseCandidates = candidatesList.map((candidate, index) => ({
+        index: index,
+        name: candidate.name,
+        voteCount: candidate.voteCount.toNumber()
+    }));
+
+    return parseCandidates;
+  }
   
 
   return (
@@ -458,6 +543,7 @@ export const StateContextProvider = ({ children }) => {
         nftMovieTokenContract,
         FractionalizeNFTContract,
         royaltiesRemunerationContract,
+        votingContract,
         //CrowdFunding
         connect,
         createCampaign: publishCampaign,
@@ -489,7 +575,13 @@ export const StateContextProvider = ({ children }) => {
         getNumberOfDAs,
         getTimeWindow,
         getCountryList,
-        getDAs
+        getDAs,
+        // VotingSC
+        addCandidate,
+        removeCandidate,
+        Accept,
+        Deny,
+        readCandidates
       }  
       }
     >

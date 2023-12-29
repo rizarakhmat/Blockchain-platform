@@ -2,7 +2,7 @@ import React from 'react'
 import { Route, Routes } from 'react-router-dom';
 
 import { NavbarProducer, SidebarProducer, BroadcasterNavbar, BroadcasterSidebar, DistributorSidebar, EndUserSidebar, Sidebar } from './components';
-import { Login, Signup, Payment, Home, Profile, CampaignDetails, CreateCampaign, BroadcasterProfile, BroadcasterCampaignDetails, BroadcasterAllCampaignsDetails, ProducerCampaignDetails, DistributorCampaignDetails, DistributorProfile, DistributorAllCampaignsDetails, EnduserProfile, EnduserCampaignDetails, EUAllCampaignsDetails } from './pages';
+import { VotingPage, Login, Signup, Payment, Home, Profile, CampaignDetails, CreateCampaign, BroadcasterProfile, BroadcasterCampaignDetails, BroadcasterAllCampaignsDetails, ProducerCampaignDetails, DistributorCampaignDetails, DistributorProfile, DistributorAllCampaignsDetails, EnduserProfile, EnduserCampaignDetails, EUAllCampaignsDetails } from './pages';
 const App = () => {
   return (
     <div>
@@ -101,6 +101,23 @@ const App = () => {
               <Route path="distributor-profile" element={<DistributorProfile />}/>
               <Route path="campaign-details/:id" element={<DistributorAllCampaignsDetails />}/>
               <Route path="distributor-profile/distributor-campaign-details/:id" element={<DistributorCampaignDetails />}/>
+            </Routes>
+          </div>
+          </div>
+        }>
+        </Route>
+
+        <Route path="/admin/*" element={
+          <div className='relative sm:-8 p-4 bg-[#f9fcff] min-h-screen flex flex-row'>
+            <div className='sm:flex hidden mr-10 relative'>
+              <SidebarProducer />
+            </div>
+
+            <div className='flex-1 max-sm:w-full max-w-[1280px] mx-auto sm:pr-5'>
+            <NavbarProducer />
+            <Routes>
+              <Route path="" element={<Home />}/>
+              <Route path="vote" element={<VotingPage />}/>
             </Routes>
           </div>
           </div>

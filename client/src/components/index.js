@@ -10,3 +10,4 @@ export { default as BroadcasterSidebar } from './Broadcaster/BroadcasterSidebar'
 export { default as DistributorSidebar } from './Distributor/DistributorSidebar';
 export { default as EndUserSidebar } from './EndUser/EndUserSidebar';
 export { default as Sidebar } from './Sidebar';
+export { default as DisplayVoteCandidates } from './Admin/DisplayVoteCandidates';

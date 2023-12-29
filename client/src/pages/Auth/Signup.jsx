@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CustomButton, FormField, Dropdown } from '../../components/Producer'
+import { useStateContext } from '../../context';
+import { Loader } from '../../components';
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 
 const Signup = () => {
+  const { addCandidate, address, votingContract } = useStateContext();
   const userRef = useRef();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [user, setUser] = useState('');
   const [validName, setValidName] = useState(false);
@@ -45,6 +49,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setIsLoading(true);
     const v1 = USER_REGEX.test(user);
     const v2 = PWD_REGEX.test(pwd);
 
@@ -53,7 +58,9 @@ const Signup = () => {
         console.log(errMsg);
       }
     
+      await addCandidate(role);
       navigate('/payment');
+      setIsLoading(false);
   }
 
   const handleRole = (e) => {
@@ -62,6 +69,8 @@ const Signup = () => {
 
   return (
     <div className='flex justify-center items-center mt-[100px]'>
+      {isLoading && <Loader />}
+
       <div>
         <h1 className="font-epilogue font-bold sm:text-[25px] text-[18px] leading-[38px] text-[#1dc071]">Signup</h1>
         <form onSubmit={handleSubmit} className='w-[420px] h-[400px] mt-[15px] flex flex-col flex-start gap-[10px]'>

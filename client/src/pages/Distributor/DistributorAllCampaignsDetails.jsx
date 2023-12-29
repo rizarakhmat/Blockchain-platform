@@ -50,10 +50,12 @@ const DistributorAllCampaignsDetails = () => {
     setIsLoading(false);
   }
 
+  // error with state.pid 
   const getDAInfo = async () => {
     setIsLoading(true);
     const allDAs = await getDAs();
     const numberOfDAs = await getNumberOfDAs();
+    console.log(state.pId);
     if (state.pId < numberOfDAs) {
       if (allDAs[state.pId].isDASet) {
         setIsDASet(allDAs[state.pId].isDASet);

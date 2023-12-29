@@ -17,3 +17,6 @@ export { default as EUAllCampaignsDetails } from './EndUser/EUAllCampaignsDetail
 export { default as Signup } from './Auth/Signup';
 export { default as Login } from './Auth/Login';
 export { default as Payment } from './Auth/Payment';
+
+// Admin
+export { default as VotingPage } from './Admin/VotingPage';
