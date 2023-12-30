@@ -11,3 +11,5 @@ export { default as DistributorSidebar } from './Distributor/DistributorSidebar'
 export { default as EndUserSidebar } from './EndUser/EndUserSidebar';
 export { default as Sidebar } from './Sidebar';
 export { default as DisplayVoteCandidates } from './Admin/DisplayVoteCandidates';
+export { default as AdminNavbar } from './Admin/AdminNavbar';
+export { default as AdminSidebar } from './Admin/AdminSidebar';

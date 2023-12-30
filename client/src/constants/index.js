@@ -123,3 +123,22 @@ export const Navbar = [
     link: '/login',
   },
 ];
+
+export const adminNavbar = [
+  {
+    name: 'dashboard',
+    imgUrl: dashboard,
+    link: '',
+  },
+  {
+    name: 'vote',
+    imgUrl: createCampaign,
+    link: 'vote',
+    disabled: true,
+  },
+  {
+    name: 'profile',
+    imgUrl: profile,
+    link: '/login',
+  },
+];
