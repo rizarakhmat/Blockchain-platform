@@ -52,7 +52,7 @@ const Payment = () => {
 
           <FormField 
             labelName="Name on card"
-            placeholder="Ex: John Website"
+            placeholder="Ex: Name Surname"
             inputType="text"
             value={state.name}
             handleChange={(e) => handleInputChange('name', e)}

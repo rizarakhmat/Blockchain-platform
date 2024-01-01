@@ -3,7 +3,7 @@ import { useStateContext } from '../../context'
 import { DistributorDisplayCampaigns } from '../../components/Distributor'
 
 const DistributorProfile = () => {
-  const { address, contract, getUserFundedCampaigns, royaltiesRemunerationContract, getDAs, getCampaigns } = useStateContext();
+  const { address, contract, getUserFundedCampaigns, getDAs, getCampaigns } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [campaigns, setCampaigns] = useState([]);
@@ -24,7 +24,7 @@ const DistributorProfile = () => {
     let matchingElements = [];
     for (let campaign of allCampaigns){
       for (let campaignRight of data) {
-        if (campaign.title === campaignRight.title && campaignRight.distributorName === address) {
+        if (campaignRight.distributor === address) {
           matchingElements.push(campaign);
         }
       }
@@ -34,12 +34,10 @@ const DistributorProfile = () => {
   }
 
   useEffect(() => {
-    if(contract) fetchCampaigns();
+    if(contract) 
+    fetchCampaigns();
+    fetchCampaignsWithRight();
   }, [address, contract])
-  
-  useEffect(() => {
-    if(royaltiesRemunerationContract) fetchCampaignsWithRight();
-  }, [address, royaltiesRemunerationContract])
 
   return (
     <div className="flex flex-col gap-5">

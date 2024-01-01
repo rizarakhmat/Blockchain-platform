@@ -10,7 +10,7 @@ import { profile, money } from '../../assets'
 const DistributorCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { buyStreamingRight, payRoyalties, getNumberOfDAs, getDAs, getTimeWindow, getCountryList, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
+  const { buyStreamingRight, payRoyalties, getDAs, getTimeWindow, getCountryList, getDonations, contract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
@@ -66,11 +66,10 @@ const DistributorCampaignDetails = () => {
   const getDAInfo = async () => {
     setIsLoading(true);
     const allDAs = await getDAs();
-    const numberOfDAs = await getNumberOfDAs();
-    if (state.pId < numberOfDAs) {
+
       if (allDAs[state.pId].isDASet) {
         setIsDASet(allDAs[state.pId].isDASet);
-        const price = allDAs[state.pId].price.toString();
+        const price = allDAs[state.pId].priceDA.toString();
         setPrice(price);
   
         const isPricePaid = allDAs[state.pId].isPricePaid;
@@ -78,7 +77,6 @@ const DistributorCampaignDetails = () => {
 
         fetchTimeCountry();
       }
-    }
     setIsLoading(false);
   }
 
@@ -93,16 +91,10 @@ const DistributorCampaignDetails = () => {
 
   const remunerateRoyalties = async (e) => {
     e.preventDefault();
-    const data1 = donators.map(i => i.donator);
-    const data2 = donators.map(i => Math.floor(parseFloat(i.donations)));
-    console.log(data1);
-    console.log(data2);
+    
     setIsLoading(true);
     const data = await payRoyalties(
       state.pId,
-      data1, 
-      data2,
-      state.target,
       { ...form}
     );
     setIsLoading(false);
@@ -127,13 +119,10 @@ const DistributorCampaignDetails = () => {
   };
 
   useEffect(() => {
-    if(contract) fetchDonators();
-  }, [contract, address])
-
-  useEffect(() => {
-    if(royaltiesRemunerationContract) 
+    if(contract) 
+    fetchDonators();
     getDAInfo();
-    }, [royaltiesRemunerationContract, address])
+  }, [contract, address])
 
   return (
     <div>

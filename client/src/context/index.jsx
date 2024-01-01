@@ -1,5 +1,5 @@
 import React, { useContext, createContext } from 'react';
-import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS, NFTMOVIETOKEN_ADDRESS, FRACTIONALIZENFT_ADDRESS, ROYALTIESREMUNERATION_ADDRESS, VOTING_ADDRESS } from '../constants/addresses'
+import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS, NFTMOVIETOKEN_ADDRESS, FRACTIONALIZENFT_ADDRESS, VOTING_ADDRESS } from '../constants/addresses'
 import { useAddress, useContract, useMetamask, useContractWrite } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 
@@ -11,7 +11,6 @@ export const StateContextProvider = ({ children }) => {
   const { contract: nftMovieContract } = useContract(NFTMOVIE_ADDRESS);
   const { contract: nftMovieTokenContract } = useContract(NFTMOVIETOKEN_ADDRESS);
   const { contract: FractionalizeNFTContract } = useContract(FRACTIONALIZENFT_ADDRESS);
-  const { contract: royaltiesRemunerationContract } = useContract(ROYALTIESREMUNERATION_ADDRESS);
   const { contract: votingContract } = useContract(VOTING_ADDRESS);
 
 
@@ -32,9 +31,9 @@ export const StateContextProvider = ({ children }) => {
   const { mutateAsync:  distributeERC20Tokens } = useContractWrite(FractionalizeNFTContract, 'distributeERC20Tokens');
 
   // call RoyaltiesRemuneration SC
-  const { mutateAsync: setDistributionAggrement } = useContractWrite(royaltiesRemunerationContract, "setDistributionAggrement");
-  const { mutateAsync: buyStreamRight } = useContractWrite(royaltiesRemunerationContract, "buyStreamingRights");
-  const { mutateAsync: remunerateRoyalties } = useContractWrite(royaltiesRemunerationContract, "remunerateRoyalties");
+  const { mutateAsync: setDistributionAggrement } = useContractWrite(contract, "setDistributionAggrement");
+  const { mutateAsync: buyStreamRight } = useContractWrite(contract, "buyStreamingRights");
+  const { mutateAsync: remunerateRoyalties } = useContractWrite(contract, "remunerateRoyalties");
   
   // call Voting SC
   const { mutateAsync: candidateAdd} = useContractWrite(votingContract, "addCandidate")
@@ -263,7 +262,7 @@ export const StateContextProvider = ({ children }) => {
     try {
       const data = await createCampaign({
         args: [
-          address, //owner of campaign
+          address, //producer of campaign
           form.title, // title
           form.description, // description
           form.target,
@@ -286,7 +285,7 @@ export const StateContextProvider = ({ children }) => {
 
     // transfer array of data to human readable format
     const parseCampaigns = campaigns.map((campaign, i) => ({
-      owner: campaign.owner,
+      producer: campaign.producer,
       title: campaign.title,
       description: campaign.description,
       target: ethers.utils.formatEther(campaign.target.toString()),
@@ -333,7 +332,7 @@ export const StateContextProvider = ({ children }) => {
     const allCampaigns = await getCampaigns();
 
     const filteredCampaigns = allCampaigns.filter((campaign) =>
-    campaign.owner === address);
+    campaign.producer === address);
 
     return filteredCampaigns;
   }
@@ -358,10 +357,10 @@ export const StateContextProvider = ({ children }) => {
 
     //////////////////////////////// RoyaltiesRemuneration SC functions
 
-  const setDistributionAggrem = async (_title, form) => {
+  const setDistributionAggrem = async (pId, form) => {
     try {
       const data = await setDistributionAggrement({ args: [
-        _title,
+        pId,
         form.price,
         form.startDate,
         form.deadline,
@@ -394,21 +393,13 @@ export const StateContextProvider = ({ children }) => {
     }
   }
 
-  const payRoyalties = async (_id, _buyers, _donations, _target, form) => {
+  const payRoyalties = async (_id, form) => {
     try {
       const amount = form.numberOfUsers * form.subscriptionFee * (form.shareOfRevenue / 100);
-            
-      const parsedDonations = [];
-      for(let i = 0; i < _donations.length; i++) {
-        parsedDonations.push(ethers.BigNumber.from(_donations[i]));
-      }
-
+      
       const data = await remunerateRoyalties({ args: [
         _id,
         form.numberOfUsers,
-        _buyers,
-        parsedDonations,
-        ethers.utils.parseEther(_target.toString()),
         form.subscriptionFee,
         form.shareOfRevenue
         ],
@@ -425,13 +416,13 @@ export const StateContextProvider = ({ children }) => {
   }
 
   const getNumberOfDAs = async () => {
-    const numberOfCampaigns = await royaltiesRemunerationContract.call('numberOfCampaigns');
+    const numberOfCampaigns = await contract.call('numberOfCampaigns');
 
     return numberOfCampaigns.toString();
   }
 
   const getTimeWindow = async (_id) => {
-    const result = await royaltiesRemunerationContract.call('getTimeWindow', [_id]);
+    const result = await contract.call('getTimeWindow', [_id]);
     const parsedTime = [];
 
     parsedTime.push({
@@ -443,13 +434,13 @@ export const StateContextProvider = ({ children }) => {
   }
   
   const getCountryList = async (_id) => {
-    const result = await royaltiesRemunerationContract.call('getCountryList', [_id]);
+    const result = await contract.call('getCountryList', [_id]);
 
     return result;
   }
 
   const getDAs = async () => {
-    const allDAs = await royaltiesRemunerationContract.call('getDistributionAggrements');
+    const allDAs = await contract.call('getDistributionAggrements');
 
     return allDAs;
   }
@@ -542,7 +533,6 @@ export const StateContextProvider = ({ children }) => {
         nftMovieContract,
         nftMovieTokenContract,
         FractionalizeNFTContract,
-        royaltiesRemunerationContract,
         votingContract,
         //CrowdFunding
         connect,

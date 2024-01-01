@@ -10,7 +10,7 @@ import { profile, money } from '../../assets'
 const DistributorAllCampaignsDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { buyStreamingRight, getNumberOfDAs, getDAs, getTimeWindow, getCountryList, donate, getDonations, royaltiesRemunerationContract, contract, address } = useStateContext();
+  const { buyStreamingRight, getDAs, getTimeWindow, getCountryList, donate, getDonations, contract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [amount, setAmount] = useState('');
@@ -54,12 +54,10 @@ const DistributorAllCampaignsDetails = () => {
   const getDAInfo = async () => {
     setIsLoading(true);
     const allDAs = await getDAs();
-    const numberOfDAs = await getNumberOfDAs();
-    console.log(state.pId);
-    if (state.pId < numberOfDAs) {
+    
       if (allDAs[state.pId].isDASet) {
         setIsDASet(allDAs[state.pId].isDASet);
-        const price = allDAs[state.pId].price.toString();
+        const price = allDAs[state.pId].priceDA.toString();
         setPrice(price);
   
         const isPricePaid = allDAs[state.pId].isPricePaid;
@@ -67,7 +65,6 @@ const DistributorAllCampaignsDetails = () => {
 
         fetchTimeCountry();
       }
-    }
     setIsLoading(false);
   }
 
@@ -91,13 +88,10 @@ const DistributorAllCampaignsDetails = () => {
   }
 
   useEffect(() => {
-    if(contract) fetchDonators();
-  }, [contract, address])
-
-  useEffect(() => {
-    if(royaltiesRemunerationContract) 
+    if(contract) 
+    fetchDonators();
     getDAInfo();
-  }, [royaltiesRemunerationContract, address])
+  }, [contract, address])
 
   return (
     <div>
@@ -185,9 +179,9 @@ const DistributorAllCampaignsDetails = () => {
 
               <CustomButton 
                 btnType="button"
-                title={state.target >= state.amountCollected ? "Target has now been met." : "Fund Campaign"}
-                styles={state.target >= state.amountCollected ? "w-full bg-[#9fb4aa]" : "w-full bg-[#8c6dfd]"}
-                handleClick={state.target >= state.amountCollected ? () => {} : handleDonate}
+                title={state.target > state.amountCollected ? "Fund Campaign" : "Target has now been met"}
+                styles={state.target > state.amountCollected ? "w-full bg-[#8c6dfd]" : "w-full bg-[#9fb4aa]"}
+                handleClick={state.target > state.amountCollected ? handleDonate : () => {}}
               />
             </div>
           </div>

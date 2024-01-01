@@ -11,7 +11,7 @@ import { profile } from '../../assets'
 const BroadcasterCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { getDAs, getSharesOf, getTimeWindow, getCountryList, setDistributionAggrem, getDonations, contract, royaltiesRemunerationContract, FractionalizeNFTContract, address } = useStateContext();
+  const { getDAs, getSharesOf, getTimeWindow, getCountryList, setDistributionAggrem, getDonations, contract, FractionalizeNFTContract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
@@ -58,7 +58,7 @@ const BroadcasterCampaignDetails = () => {
     e.preventDefault();
 
     setIsLoading(true);
-    await setDistributionAggrem(state.title, { ...form, startDate: Math.floor(new Date(form.startDate).getTime() / 1000), deadline: Math.floor(new Date(form.deadline).getTime() / 1000)} );
+    await setDistributionAggrem(state.pId, { ...form, startDate: Math.floor(new Date(form.startDate).getTime() / 1000), deadline: Math.floor(new Date(form.deadline).getTime() / 1000)} );
 
     setIsLoading(false);
     navigate('/broadcaster/');
@@ -102,18 +102,15 @@ const BroadcasterCampaignDetails = () => {
   }
 
   useEffect(() => {
-    if(contract) fetchDonators();
+    if(contract) 
+    fetchDonators();
+    getDAInfo();
+    fetchTimeCountry(); 
   }, [contract, address])
   
   useEffect(() => {
     if(FractionalizeNFTContract) fetchShares(); 
   }, [FractionalizeNFTContract, address])
-  
-  useEffect(() => {
-    if(royaltiesRemunerationContract) 
-    getDAInfo();
-    fetchTimeCountry(); 
-  }, [royaltiesRemunerationContract, address])
 
   // internal functions to update country list
   const handleAddCountry = () => {

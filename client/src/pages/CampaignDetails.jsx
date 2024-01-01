@@ -121,9 +121,9 @@ const CampaignDetails = () => {
 
               <CustomButton 
                 btnType="button"
-                title="Fund Campaign"
-                styles={state.target >= state.amountCollected ? "w-full bg-[#9fb4aa]" : "w-full bg-[#8c6dfd]"}
-                handleClick={state.target >= state.amountCollected ? () => {} : handleDonate}
+                title={state.target > state.amountCollected ? "Fund Campaign" : "Target has now been met"}
+                styles={state.target > state.amountCollected ? "w-full bg-[#8c6dfd]" : "w-full bg-[#9fb4aa]"}
+                handleClick={state.target > state.amountCollected ? handleDonate : () => {}}
               />
             </div>
           </div>
