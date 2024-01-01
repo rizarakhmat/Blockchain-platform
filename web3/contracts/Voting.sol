@@ -40,13 +40,13 @@ contract Voting {
         }
     }
 
-    function voteAccept(uint256 _candidateIndex) public {
+    function voteAccept(uint256 _candidateIndex) public onlyAdmin {
         require(_candidateIndex < candidates.length, "Invalid candidate index.");
 
         candidates[_candidateIndex].voteCount++;
     }
     
-    function voteDeny(uint256 _candidateIndex) public {
+    function voteDeny(uint256 _candidateIndex) public onlyAdmin {
         require(_candidateIndex < candidates.length, "Invalid candidate index.");
 
         candidates[_candidateIndex].voteCount--;
