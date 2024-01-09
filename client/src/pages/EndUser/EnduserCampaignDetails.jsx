@@ -11,17 +11,39 @@ import { profile } from '../../assets'
 const EnduserCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { getSharesOf, getDonations, contract, FractionalizeNFTContract, address } = useStateContext();
+  const { getDAs, getUserRoyalties, getSharesOf, getDonations, contract, FractionalizeNFTContract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
   const [isOwnerOfShare, setIsOwnerOfShare] = useState(false);
+  const [isRoyaltiesPayed, setIsRoyaltiesPaid] = useState(false);
+  const [distributor, setDistributor] = useState();
+  const [royalties, setRoyalties] = useState([]);
 
   const fetchDonators = async () => {
     setIsLoading(true);
     const data = await getDonations(state.pId);
 
     setDonators(data);
+    setIsLoading(false);
+  }
+
+  // function to get DA info
+  const getDAInfo = async () => {
+    setIsLoading(true);
+    const allDAs = await getDAs();
+    if (allDAs[state.pId].isDASet) {
+      
+      setDistributor(allDAs[state.pId].distributor);
+
+      if(allDAs[state.pId].isRoyaltiesRemunerated) {
+        setIsRoyaltiesPaid(allDAs[state.pId].isRoyaltiesRemunerated);
+
+        const userRoyalty = await getUserRoyalties(state.pId);
+        setRoyalties(userRoyalty);
+      }
+    }
+
     setIsLoading(false);
   }
 
@@ -52,7 +74,9 @@ const EnduserCampaignDetails = () => {
   };
 
   useEffect(() => {
-    if(contract) fetchDonators();
+    if(contract) 
+    fetchDonators();
+    getDAInfo();
   }, [contract, address])
 
   useEffect(() => {
@@ -82,15 +106,18 @@ const EnduserCampaignDetails = () => {
       <div className="mt-[60px] flex lg:flex-row flex-col gap-5">
         <div className="flex-[2] flex flex-col gap-[40px]">
         <div>
-            {donators.map((item, index) => (
+          {donators.map((item, index) => (
               isOwnerOfShare ? (
                 <>
+                  {item.donator === address ? (
+                    <>
                     <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Ownership</h4>
-    
                     <div className="mt-[20px]">
-                      <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You are the owner of {((item.donations * 100) / state.target).toFixed(2)} % of the "{state.title}" NFT. Now you can set up the Distribution Agreement.</p>
+                      <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">You are the owner of {((item.donations * 100) / state.target).toFixed(2)} % of the "{state.title}" NFT.</p>
                     </div>
-                  </>
+                    </>
+                  ) : null }
+                </>
               ) : (
               null
               )
@@ -105,7 +132,7 @@ const EnduserCampaignDetails = () => {
                 <img src={profile} alt="user" className="w-[60%] h-[60%] object-contain"/>
               </div>
               <div>
-                <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] break-all">{state.owner}</h4>
+                <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] break-all">{state.producer}</h4>
                 <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]"># Campaigns</p>
               </div>
             </div>
@@ -139,6 +166,17 @@ const EnduserCampaignDetails = () => {
                 ))}
               </div>
           </div>
+          
+          <>
+          {isRoyaltiesPayed ? (
+            <>
+              <div className='flex flex-col gap-[10px]'>
+                <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Royalties</h4>
+                <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[10px]">You have recieved {royalties} ETH as royalties remuniration from Distributor {distributor}</p>
+              </div>
+            </>
+          ) : null}
+          </>
 
         </div>  
         

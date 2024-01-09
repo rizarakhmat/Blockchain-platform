@@ -438,6 +438,25 @@ export const StateContextProvider = ({ children }) => {
 
     return result;
   }
+  
+  const getRoyalties = async (_id) => {
+    const result = await contract.call('getRoyalties', [_id]);
+
+    return result;
+  }
+
+  const getUserRoyalties = async (_id) => {
+      const data = await getDonations(_id);
+
+      const donatorIndex = data.findIndex(item => item.donator === address);
+
+      if ( donatorIndex !== -1) {
+        const royalty = await getRoyalties(_id);
+
+        return ethers.utils.formatEther(royalty[donatorIndex].toString());
+      }
+      
+  }
 
   const getDAs = async () => {
     const allDAs = await contract.call('getDistributionAggrements');
@@ -565,6 +584,7 @@ export const StateContextProvider = ({ children }) => {
         getNumberOfDAs,
         getTimeWindow,
         getCountryList,
+        getUserRoyalties,
         getDAs,
         // VotingSC
         addCandidate,

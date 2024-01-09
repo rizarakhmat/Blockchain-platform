@@ -14,9 +14,8 @@ const DistributorCampaignDetails = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
-  // states needed for remunirateRoyalties();
-  const [buyers, setBuyers] = useState([]);
-  const [donations, setDonations] = useState([]);
+  
+  
   const [form, setForm] = useState({ 
     numberOfUsers: '',
     subscriptionFee: '',
@@ -28,6 +27,7 @@ const DistributorCampaignDetails = () => {
   const [price, setPrice] = useState();
   const [isDASet, setIsDASet] = useState(false);
   const [isSteamingRightOwner, setIsSteamingRightOwner] = useState();
+  const [isRoyaltiesPayed, setIsRoyaltiesPaid] = useState(false);
 
   // function to update form
   const handleFormFieldChange = (fieldName, e) => {
@@ -76,6 +76,10 @@ const DistributorCampaignDetails = () => {
         setIsSteamingRightOwner(isPricePaid);
 
         fetchTimeCountry();
+
+        if(allDAs[state.pId].isRoyaltiesRemunerated) {
+          setIsRoyaltiesPaid(allDAs[state.pId].isRoyaltiesRemunerated);
+        }
       }
     setIsLoading(false);
   }
@@ -157,7 +161,7 @@ const DistributorCampaignDetails = () => {
                 <img src={profile} alt="user" className="w-[60%] h-[60%] object-contain"/>
               </div>
               <div>
-                <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] break-all">{state.owner}</h4>
+                <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] break-all">{state.producer}</h4>
                 <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]"># Campaigns</p>
               </div>
             </div>
@@ -273,9 +277,9 @@ const DistributorCampaignDetails = () => {
                  </p>
                  <div className="mt-[30px]">
                    <CustomButton 
-                     btnType="submit"
-                     title="Pay royalties"
-                     styles="w-full bg-[#1dc071]"
+                     btnType={isRoyaltiesPayed ? "button" : "submit"}
+                     title={isRoyaltiesPayed ? "Royalties have been already remunerated" : "Pay royalties"}
+                     styles={isRoyaltiesPayed ? "w-full bg-[#9fb4aa]" : "w-full bg-[#1dc071]"}
                    />
                  </div>
                </div>

@@ -11,7 +11,7 @@ import { profile } from '../../assets'
 const BroadcasterCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { getDAs, getSharesOf, getTimeWindow, getCountryList, setDistributionAggrem, getDonations, contract, FractionalizeNFTContract, address } = useStateContext();
+  const { getDAs, getSharesOf, getTimeWindow, getCountryList, getUserRoyalties, setDistributionAggrem, getDonations, contract, FractionalizeNFTContract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
@@ -24,7 +24,9 @@ const BroadcasterCampaignDetails = () => {
   const [countryList, setCountryList] = useState([]);
   const [isDASet, setIsDASet] = useState(false);
   const [isPricePaid, setIsPricePaid] = useState(false);
+  const [isRoyaltiesPayed, setIsRoyaltiesPaid] = useState(false);
   const [distributor, setDistributor] = useState();
+  const [royalties, setRoyalties] = useState([]);
 
   const [form, setForm] = useState({
     name: '',
@@ -49,8 +51,17 @@ const BroadcasterCampaignDetails = () => {
       const isPricePaid = allDAs[state.pId].isPricePaid;
       setIsPricePaid(isPricePaid);
       
-      setDistributor(allDAs[state.pId].distributorName);
+      setDistributor(allDAs[state.pId].distributor);
+
+      if(allDAs[state.pId].isRoyaltiesRemunerated) {
+        setIsRoyaltiesPaid(allDAs[state.pId].isRoyaltiesRemunerated);
+
+        const userRoyalty = await getUserRoyalties(state.pId);
+
+        setRoyalties(userRoyalty);
+      }
     }
+
     setIsLoading(false);
   }
 
@@ -96,7 +107,6 @@ const BroadcasterCampaignDetails = () => {
   const fetchDonators = async () => {
     setIsLoading(true);
     const data = await getDonations(state.pId);
-    
     setDonators(data);
     setIsLoading(false);
   }
@@ -195,7 +205,7 @@ const BroadcasterCampaignDetails = () => {
                 <img src={profile} alt="user" className="w-[60%] h-[60%] object-contain"/>
               </div>
               <div>
-                <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] break-all">{state.owner}</h4>
+                <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] break-all">{state.producer}</h4>
                 <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]"># Campaigns</p>
               </div>
             </div>
@@ -352,6 +362,17 @@ const BroadcasterCampaignDetails = () => {
               <div className='flex flex-col gap-[10px]'>
                 <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Distributor</h4>
                 <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[10px]">{distributor}</p>
+              </div>
+            </>
+          ) : null}
+          </>
+          
+          <>
+          {isRoyaltiesPayed ? (
+            <>
+              <div className='flex flex-col gap-[10px]'>
+                <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Royalties</h4>
+                <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[10px]">You have recieved {royalties} ETH as royalties remuniration</p>
               </div>
             </>
           ) : null}
