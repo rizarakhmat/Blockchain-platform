@@ -57,9 +57,11 @@ const Signup = () => {
         setErrMsg("Invalid Entry");
         console.log(errMsg);
       }
-    
+    if(role) {
+      console.log(role)
       await addCandidate(role);
       navigate('/payment');
+    }
       setIsLoading(false);
   }
 

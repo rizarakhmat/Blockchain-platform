@@ -371,8 +371,8 @@ const BroadcasterCampaignDetails = () => {
           {isRoyaltiesPayed ? (
             <>
               <div className='flex flex-col gap-[10px]'>
-                <h4 className="font-epilogue font-semibold text-[18px] text-[#808191] uppercase">Royalties</h4>
-                <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[10px]">You have recieved {royalties} ETH as royalties remuniration</p>
+                <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">Royalties</h4>
+                <p className="font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-ll mt-[10px]">You have recieved {royalties} ETH as royalties from Distributor {distributor}</p>
               </div>
             </>
           ) : null}

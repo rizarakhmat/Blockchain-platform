@@ -10,7 +10,7 @@ import { profile, money } from '../../assets'
 const DistributorCampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { buyStreamingRight, payRoyalties, getDAs, getTimeWindow, getCountryList, getDonations, contract, address } = useStateContext();
+  const { getNFTs, buyStreamingRight, payRoyalties, getDAs, getTimeWindow, getCountryList, getDonations, contract, nftMovieContract, address } = useStateContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [donators, setDonators] = useState([]);
@@ -28,6 +28,7 @@ const DistributorCampaignDetails = () => {
   const [isDASet, setIsDASet] = useState(false);
   const [isSteamingRightOwner, setIsSteamingRightOwner] = useState();
   const [isRoyaltiesPayed, setIsRoyaltiesPaid] = useState(false);
+  const [linkIPFS, setLinkIPFS] = useState();
 
   // function to update form
   const handleFormFieldChange = (fieldName, e) => {
@@ -93,6 +94,8 @@ const DistributorCampaignDetails = () => {
     setIsLoading(false);
   }
 
+
+  // function to pay royalties
   const remunerateRoyalties = async (e) => {
     e.preventDefault();
     
@@ -105,28 +108,24 @@ const DistributorCampaignDetails = () => {
     navigate('/distributor/');
   }
 
-
-  // internal function to calculate Sum of all donationions of this address
-  const calculateSum = (owner) => {
-    let sum = 0;
-
-    donators.forEach((item) => {
-      for (const prop in item) {
-
-        if (prop === "donator" && item.donator === owner) {
-          sum += parseFloat(item.donations);
-        } 
-      }
-    })
-
-    return sum;
-  };
+  // retriev info from NFT - IPFS link
+  const fetchNFTs = async () => {
+    setIsLoading(true);
+    const nfts = await getNFTs();
+    setLinkIPFS(nfts[state.pId].movieURI);
+    setIsLoading(false);
+  }
 
   useEffect(() => {
     if(contract) 
     fetchDonators();
     getDAInfo();
   }, [contract, address])
+
+  useEffect(() => {
+    if(nftMovieContract) 
+    fetchNFTs();
+  }, [nftMovieContract, address])
 
   return (
     <div>
@@ -142,7 +141,7 @@ const DistributorCampaignDetails = () => {
         </div>
 
         <div className="flex md:w-[150px] w-full flex-wrap justify-between md:mt-[50px]">
-          <CountBox title="You payed" value={calculateSum(address)} />
+          <CountBox title="You payed" value={price} />
           <CountBox title="#Funders" value={donators.length} />
           {isDASet ? (
             <CountBox title="Days left" value={daysLeft(timeWindow.map(i => i.deadline))} />
@@ -235,6 +234,17 @@ const DistributorCampaignDetails = () => {
                 </div>
             </>
           ) : null}
+
+          {isSteamingRightOwner ? (
+            <div>
+              <h4 className="font-epilogue font-semibold text-[18px] text-[#1dc071] uppercase">{state.title} Link</h4>
+              <div className="mt-[20px]">
+              <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{linkIPFS}</p>
+            </div>
+            </div>
+          ) : (
+            null
+          )}
     
           {isSteamingRightOwner ? (
              <form onSubmit={remunerateRoyalties}  className='flex-1'>
