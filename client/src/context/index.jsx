@@ -1,5 +1,6 @@
 import React, { useContext, createContext } from 'react';
 import { CROWDFUNDING_ADDRESS, NFTMOVIE_ADDRESS, NFTMOVIETOKEN_ADDRESS, FRACTIONALIZENFT_ADDRESS, VOTING_ADDRESS } from '../constants/addresses'
+import { CROWDFUNDING_ABI, NFTMOVIE_ABI, NFTMOVIETOKEN_ABI, FRACTIONALIZENFT_ABI, VOTING_ABI } from '../constants/abi'
 import { useAddress, useContract, useMetamask, useContractWrite } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 
@@ -7,11 +8,11 @@ const StateContext = createContext();
 
 export const StateContextProvider = ({ children }) => {
 
-  const { contract } = useContract(CROWDFUNDING_ADDRESS);
-  const { contract: nftMovieContract } = useContract(NFTMOVIE_ADDRESS);
-  const { contract: nftMovieTokenContract } = useContract(NFTMOVIETOKEN_ADDRESS);
-  const { contract: FractionalizeNFTContract } = useContract(FRACTIONALIZENFT_ADDRESS);
-  const { contract: votingContract } = useContract(VOTING_ADDRESS);
+  const { contract } = useContract(CROWDFUNDING_ADDRESS, CROWDFUNDING_ABI);
+  const { contract: nftMovieContract } = useContract(NFTMOVIE_ADDRESS, NFTMOVIE_ABI);
+  const { contract: nftMovieTokenContract } = useContract(NFTMOVIETOKEN_ADDRESS, NFTMOVIETOKEN_ABI);
+  const { contract: FractionalizeNFTContract } = useContract(FRACTIONALIZENFT_ADDRESS, FRACTIONALIZENFT_ABI);
+  const { contract: votingContract } = useContract(VOTING_ADDRESS, VOTING_ABI);
 
 
   // call CrowdFunding SC

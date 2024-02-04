@@ -24,7 +24,7 @@ const DistributorProfile = () => {
     let matchingElements = [];
     for (let campaign of allCampaigns){
       for (let campaignRight of data) {
-        if (campaignRight.distributor === address) {
+        if (campaignRight.distributor === address && !matchingElements.includes(campaign)) {
           matchingElements.push(campaign);
         }
       }

@@ -63,7 +63,7 @@ const ProducerCampaignDetails = () => {
 
     setIsLoading(true);
     const mintedNFTid = await tokenID(); 
-    const amount = 10000;
+    const amount = 1000000000000000000000;
     await mintERC20Tokens(amount, mintedNFTid); // hardcoded
 
     await approveTokenSC(amount); // hardcoded
@@ -125,7 +125,7 @@ const ProducerCampaignDetails = () => {
 
   const fetchOwnershipPercent = async () => {
     setIsLoading(true);
-    const totalTokens = 10000;
+    const totalTokens = 1000000000000000000000;
     let balance = [];
     for (let i = 0; i < funders.length; i++) {
       let tokens = await owners(funders[i]);
